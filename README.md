@@ -5,7 +5,7 @@
     - In head run: `python -m venv scrapper-env`
     
 2. Activate Virtual Work Environment
-    - On Windows, run: `scrapper-env\Scripts\activate.bat`
+    - On Windows, run: `scrapper-env\Scripts\activate`
     - On Unix or MacOS, run: `source scrapper-env/bin/activate`
 
 3. Upgrade/Update pip
