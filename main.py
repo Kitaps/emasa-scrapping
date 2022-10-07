@@ -1,0 +1,1 @@
+# Script that pulls data from requests, processes it and saves it in a database
