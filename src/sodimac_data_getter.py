@@ -49,9 +49,12 @@ def extract_page_data(soup):
     # Extract and save only the useful data
     count = 1
     page_products = soup.find("div", attrs = {'id': 'testId-searchResults-products'})
-    # for product in page_products:
-    #     ic(product.text)
-    ic(page_products.prettify())
+    # page_products = soup.find_all("div", attrs = {'class': 'jsx-4001457643 search-results-4-grid grid-pod'})
+    for product in page_products:
+        ic(count)
+        count += 1
+    # ic(len(page_products))
+    # ISSUE --> Only 12 entrys are provided by the BeautyfullSoup, but the GET request returns whole page
 
 
     
