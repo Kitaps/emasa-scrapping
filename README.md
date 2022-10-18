@@ -15,8 +15,13 @@
     - In virtual env head Run: `python -m pip install -r requirements.txt`
 
 5. Add needed credentials as environment variables
-    - Edit the activate script at path: `source scrapper-env/bin/activate`
-    - In the last line add the needed passwords as: `export PASSWORDNAME='PASSWORD'`
+    - Edit the activate scripts at the activation path (2.):
+        - In the last line add the needed passwords as: `export CREDENTIALNAME="CREDENTIAL"`
+        - In the last line before the `signature block` as: `$env:CREDENTIALNAME = 'CREDENTIAL'`
+    - If it does not work try:
+        - `deactivate` and `activate` if needed
+        - using `Powershell`   
+    - todo: Make it work with `cmd` & `terminal`
 
 ## Tear down
 1. Deactivate Virtual Work Environment: Depending on the OS, do the same as in `activate` but instead run the `deactivate` command
