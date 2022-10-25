@@ -35,4 +35,6 @@
 ## Useful Commands
 - PostgreSQL
     - In case of wrong console code page run: `chcp 1252`
+        - todo: add command to `activate`
     - Login with default user: `psql -U postgres`
+    - Check psql server port: `SELECT * FROM pg_settings WHERE name = 'port';`
