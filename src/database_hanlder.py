@@ -44,7 +44,7 @@ class DBHandler:
 
     # SQL commands
     def create_table(self, name): # Name should be always be singular
-        sql_command = f"""CREATE TABLE {name}s (
+        sql_command = f"""CREATE TABLE IF NOT EXISTS {name}s (
             {name}_id SERIAL PRIMARY KEY,
             {name}_name VARCHAR(255) NOT NULL
             )
@@ -61,19 +61,22 @@ class DBHandler:
     def execute_commands(self):
         for sql_command in self.commands:
             try:
-                if sql_command[0] == 'I':
+                if sql_command[0:6] == 'INSERT':
+                    # If the command starts with I it means it is an INSERT command
+                    cursor, connection = connect()
                     # The multiprocessing needs it's own connection
                     # Thats why we connect and disconect in this scope
-                    cursor, connection = connect()
-                    # If the command starts with I it means it is an INSERT command
-                    # In this case, to reduce execution time we do an batch insert
-                    # For this we need executemany()
                     # !! Documentation says that a loop would be as efficient as executemany in the current version!!
                     cursor.executemany(sql_command, self.products)
-                    self.save_and_disconnect(cursor, connection)
+                    self.save_and_disconnect(cursor, connection) 
+                elif sql_command[0:6] == 'CREATE':
+                    self.cursor.execute(sql_command)
+                    self.__connection.commit()
                 else:
                     self.cursor.execute(sql_command)
             except psycopg2.errors.DuplicateTable:
+                # Added IF NOT EXISTS to create command, 
+                # so this exception should not happen 
                 ic("The table already exists: Command Skipped")
             except psycopg2.errors.InFailedSqlTransaction as error:
                 self.error = error
