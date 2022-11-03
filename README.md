@@ -13,3 +13,12 @@
 
 4. Install dependencies: This reads the `requirements.txt` file and installs the required dependencies. 
     - In virtual env head Run: `python -m pip install -r requirements.txt`
+
+## Tear down
+1. Deactivate Virtual Work Environment: Depending on the OS, do the same as in `activate` but instead run the `deactivate` command
+    - On Windows, run `scrapper-env\Scripts\deactivate`
+
+## Used Libraries
+- `requests`: provides easy requests to webpages to get html responses
+- `beautifulsoup`: makes reading html strings easier
+- `icecream`: returns better print results
