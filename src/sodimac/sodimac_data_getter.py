@@ -1,9 +1,14 @@
 import time
 import json
+import sys
 import requests
+from os.path import dirname, realpath
 from random import randint
 from icecream import ic
 from bs4 import BeautifulSoup
+# Add the parent directory name of the current file into the python path
+# to import module from parent dir
+sys.path.append(dirname(dirname(realpath(__file__))))
 from aux_functions import load_categories
 
 categories = load_categories("sodimac")
