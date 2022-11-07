@@ -20,5 +20,6 @@
 
 ## Used Libraries
 - `requests`: provides easy requests to webpages to get html responses
-- `beautifulsoup`: makes reading html strings easier
+- `BeautifulSoup`: makes reading html strings easier
 - `icecream`: returns better print results
+- `lxml`: parses the soup so it can be navigated with BeautifulSoup
