@@ -9,10 +9,19 @@
     - On Unix or MacOS, run: `source scrapper-env/bin/activate`
 
 3. Upgrade/Update pip
-    run: `python.exe -m pip install --upgrade pip`
+    - Run: `python.exe -m pip install --upgrade pip`
 
 4. Install dependencies: This reads the `requirements.txt` file and installs the required dependencies. 
     - In virtual env head Run: `python -m pip install -r requirements.txt`
+
+5. Add needed credentials as environment variables
+    - Edit the activate scripts at the activation path (2.):
+        - In the last line add the needed passwords as: `export CREDENTIALNAME="CREDENTIAL"`
+        - In the last line before the `signature block` as: `$env:CREDENTIALNAME = 'CREDENTIAL'`
+    - If it does not work try:
+        - `deactivate` and `activate` if needed
+        - using `Powershell`   
+    - todo: Make it work with `cmd` & `terminal`
 
 ## Tear down
 1. Deactivate Virtual Work Environment: Depending on the OS, do the same as in `activate` but instead run the `deactivate` command
@@ -23,6 +32,13 @@
 - `BeautifulSoup`: makes reading html strings easier
 - `icecream`: returns better print results
 - `lxml`: parses the soup so it can be navigated with BeautifulSoup
+
+## Useful Commands
+- PostgreSQL
+    - In case of wrong console code page run: `chcp 1252`
+        - todo: add command to `activate`
+    - Login with default user: `psql -U postgres`
+    - Check psql server port: `SELECT * FROM pg_settings WHERE name = 'port';`
 
 ## Deprecation notices
 Since sales wants to search for products by ID instead of by category, development of the get_category module has stopped for sodimac (and not started for easy).
