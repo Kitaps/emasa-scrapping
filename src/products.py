@@ -9,14 +9,11 @@ class Product:
         self.image_at = image_at
         self.price = price
         self.url = url
+        # specifications = {item1_key: item1_value, ..., itemn_key: itemn_value}
         self.specifications = specifications
 
     def __str__(self):
         return f"{self.name}: ${self.price}"
-
-
-    def to_sql(self):
-        return (self.name, self.price, self.sku, self.brand, self.url, self.image_at, self.description)
 
 
 if __name__ == "__main__":

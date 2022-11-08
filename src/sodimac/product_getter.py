@@ -53,7 +53,7 @@ def trim(raw_specifications):
     # [{'id': 'Marca', 'name': 'Marca', 'value': 'Mamut'},
     # {'id': 'Largo_de_la_rosca', 'name': 'Largo de la rosca', 'value': '2 "'},
     # {'id': 'Diámetro', 'name': 'Diámetro', 'value': '1/4 "'}]
-    # and resturns it as 
+    # and resturns it as key: value
     # {"Marca": "Mamut",
     # "Largo_de_la_rosca": "2 "",
     # "Diámetro": 1/4 ""}

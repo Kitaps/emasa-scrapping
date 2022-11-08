@@ -53,38 +53,39 @@ class DBHandler:
             url VARCHAR(2083),
             image_at VARCHAR(2083),
             description TEXT
-            )
+            );
             """
         # Save the command to queue and the table name for further use
         self.commands.append(sql_command)
         self.table_name = f"{name}s"
 
-    def add_product_sql(self, product):
-        # We add the product to the handlers product list
-        # To do this we use the products method to be usable by executemany
-        self.products.append(product.to_sql())
-
     def insert_items(self):
-        # Prepare the command to insert the items
-        sql_command = "INSERT INTO products(name, price, sku, brand, url, image_at, description) VALUES(%s, %s, %s, %s, %s, %s, %s)"
-        self.commands.append(sql_command)
+
+        for product in self.products:
+            # Prepare the command to insert the items
+            # Add extra columns to table to fit all extra product specifications
+            keys, values = list(), list()
+            if product.specifications:
+                keys = list(product.specifications.keys())
+                values = product.specifications.values()
+            for spec in keys:
+                self.commands.append(f"ALTER TABLE products ADD COLUMN IF NOT EXISTS {spec} VARCHAR(255);")
+            # Add the product row
+            keys.insert(0, "") # We add an empty string so that after the join the keys_str looks like:
+                               # ", First, Second, ..., Last"
+            keys_str = ", ".join(keys)
+            sql_command = f"""INSERT INTO 
+            products(name, price, sku, brand, url, image_at, description{keys_str}) 
+            VALUES{
+                (product.name, product.price, product.sku, product.brand, 
+                product.url, product.image_at, product.description, *values)};"""
+            self.commands.append(sql_command)
         
     def execute_commands(self):
         for sql_command in self.commands:
             try:
-                if sql_command[0:6] == 'INSERT':
-                    # If the command starts with I it means it is an INSERT command
-                    cursor, connection = connect()
-                    # The multiprocessing needs it's own connection
-                    # Thats why we connect and disconect in this scope
-                    # !! Documentation says that a loop would be as efficient as executemany in the current version!!
-                    cursor.executemany(sql_command, self.products)
-                    self.save_and_disconnect(cursor, connection) 
-                elif sql_command[0:6] == 'CREATE':
-                    self.cursor.execute(sql_command)
-                    self.__connection.commit()
-                else:
-                    self.cursor.execute(sql_command)
+                self.cursor.execute(sql_command)
+                self.__connection.commit()
             except psycopg2.errors.DuplicateTable:
                 # Added IF NOT EXISTS to create command, 
                 # so this exception should not happen 

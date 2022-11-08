@@ -16,8 +16,8 @@ def main():
     # ic(anti_pinchazo.to_sql())
 
     handler = DBHandler()
-    handler.add_product_sql(bateria)
-    handler.add_product_sql(anti_pinchazo)
+    handler.products.append(bateria)
+    handler.products.append(anti_pinchazo)
     ic(handler.products)
     handler.create_table("product")
     handler.insert_items()
