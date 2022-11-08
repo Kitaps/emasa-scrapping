@@ -29,8 +29,9 @@
 
 ## Used Libraries
 - `requests`: provides easy requests to webpages to get html responses
-- `beautifulsoup`: makes reading html strings easier
+- `BeautifulSoup`: makes reading html strings easier
 - `icecream`: returns better print results
+- `lxml`: parses the soup so it can be navigated with BeautifulSoup
 
 ## Useful Commands
 - PostgreSQL
@@ -38,3 +39,6 @@
         - todo: add command to `activate`
     - Login with default user: `psql -U postgres`
     - Check psql server port: `SELECT * FROM pg_settings WHERE name = 'port';`
+
+## Deprecation notices
+Since sales wants to search for products by ID instead of by category, development of the get_category module has stopped for sodimac (and not started for easy).
