@@ -15,8 +15,15 @@ class Product:
         return f"{self.name}: ${self.price}"
 
 if __name__ == "__main__":
-    from sodimac.product_getter import get_data_for, parse_data
+    import sodimac.product_getter as sodimac_getter
+    import easy.product_getter as easy_getter
 
-    product_data = parse_data(get_data_for(110316112))
+    product_data = sodimac_getter.parse_data(sodimac_getter.get_data_for(110316112))
     bateria = Product(**product_data)
+
+    product_data = easy_getter.parse_data(easy_getter.get_data_for(672286), 672286)
+    anti_pinchazo = Product(**product_data)
+
+    print(bateria)
+    print(anti_pinchazo)
 
