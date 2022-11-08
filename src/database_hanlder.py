@@ -38,7 +38,7 @@ class DBHandler:
     def __init__(self):
         self.cursor, self.__connection = connect()
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
-        self.products = dict() # Or list ## Temporary products fetched and to be add to db
+        self.products = list() # Temporary products fetched and to be add to db
         self.commands = list()
         self.error = None # Last error encountered
 
