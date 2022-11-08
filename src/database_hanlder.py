@@ -46,16 +46,27 @@ class DBHandler:
     def create_table(self, name): # Name should be always be singular
         sql_command = f"""CREATE TABLE IF NOT EXISTS {name}s (
             {name}_id SERIAL PRIMARY KEY,
-            {name}_name VARCHAR(255) NOT NULL
+            name VARCHAR(255) NOT NULL,
+            price INTEGER NOT NULL,
+            sku VARCHAR(15),
+            brand VARCHAR(255),
+            url VARCHAR(2083),
+            image_at VARCHAR(2083),
+            description TEXT
             )
             """
         # Save the command to queue and the table name for further use
         self.commands.append(sql_command)
         self.table_name = f"{name}s"
 
+    def add_product_sql(self, product):
+        # We add the product to the handlers product list
+        # To do this we use the products method to be usable by executemany
+        self.products.append(product.to_sql())
+
     def insert_items(self):
-        # Define if products will be a list or dict
-        sql_command = "INSERT INTO products(product_name) VALUES(%s)"
+        # Prepare the command to insert the items
+        sql_command = "INSERT INTO products(name, price, sku, brand, url, image_at, description) VALUES(%s, %s, %s, %s, %s, %s, %s)"
         self.commands.append(sql_command)
         
     def execute_commands(self):
@@ -97,17 +108,9 @@ class DBHandler:
 
     
 if __name__ == "__main__":
-    example_products = [
-        ('AKM Semiconductor Inc.',),
-        ('Asahi Glass Co Ltd.',),
-        ('Daikin Industries Ltd.',),
-        ('Dynacast International Inc.',),
-        ('Foster Electric Co. Ltd.',),
-        ('Murata Manufacturing Co. Ltd.',)
-    ]
 
     handler = DBHandler()
-    handler.products = example_products
+    handler.products
 
     handler.create_table("product")
     handler.insert_items()

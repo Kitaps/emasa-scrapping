@@ -1,8 +1,8 @@
 class Product:
 
-    def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications ) -> None:
+    def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications) -> None:
         self.name = name
-        self.product_id = product_id
+        self.store_product_id = product_id
         self.brand = brand
         self.description = description
         self.sku = sku
@@ -13,6 +13,11 @@ class Product:
 
     def __str__(self):
         return f"{self.name}: ${self.price}"
+
+
+    def to_sql(self):
+        return (self.name, self.price, self.sku, self.brand, self.url, self.image_at, self.description)
+
 
 if __name__ == "__main__":
     import sodimac.product_getter as sodimac_getter
