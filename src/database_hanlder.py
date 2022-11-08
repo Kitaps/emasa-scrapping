@@ -66,8 +66,13 @@ class DBHandler:
 
     def insert_items(self):
         # Prepare the command to insert the items
+        # Add extra columns to table to fit all extra product specifications
+        self.commands.append("ALTER TABLE products ADD COLUMN IF NOT EXISTS meme VARCHAR(10);")
+        # Add the product row
         sql_command = "INSERT INTO products(name, price, sku, brand, url, image_at, description) VALUES(%s, %s, %s, %s, %s, %s, %s)"
         self.commands.append(sql_command)
+
+    
         
     def execute_commands(self):
         for sql_command in self.commands:
@@ -85,6 +90,7 @@ class DBHandler:
                     self.__connection.commit()
                 else:
                     self.cursor.execute(sql_command)
+                    self.__connection.commit()
             except psycopg2.errors.DuplicateTable:
                 # Added IF NOT EXISTS to create command, 
                 # so this exception should not happen 

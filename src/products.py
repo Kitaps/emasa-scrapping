@@ -16,6 +16,7 @@ class Product:
 
 
     def to_sql(self):
+        # Method to parse object atributes as a executemany readable
         return (self.name, self.price, self.sku, self.brand, self.url, self.image_at, self.description)
 
 
