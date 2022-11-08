@@ -62,13 +62,16 @@ def trim(raw_specifications):
 
 def clean(price):
     # Remove . and transform from str to int
-    return int(price[0].replace(".", ""))
+    
+    return int(price.replace(".", ""))
 
 if __name__ == "__main__":
 
-    product_data = get_data_for(110316112)
-    ready_data = parse_data(product_data)
-    ic(", ".join(ready_data.keys()))
+    # product_data = get_data_for(110316112)
+    # ready_data = parse_data(product_data)
+    # ic(", ".join(ready_data.keys()))
+
+    ic(clean('15.690'))
 
     # with open("request_inputs&outputs/sodimac/product.json", 'w') as json_file:
     #     json.dump(product_data, json_file)
