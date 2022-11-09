@@ -1,24 +1,41 @@
+from random import randint
+from time import sleep
 from icecream import ic
 import src.sodimac.product_getter as sodimac_getter
 import src.easy.product_getter as easy_getter
 from src.products import Product
 from src.database_hanlder import DBHandler
+from src.sku_getter import sonax_skus
+
 
 
 def main():
+    errors = 0
+    handler = DBHandler() # Create instance of database handler
     # We create two example products to try some things
-    product_data = sodimac_getter.parse_data(sodimac_getter.get_data_for(110316112))
-    bateria = Product(**product_data)
-
-    product_data = easy_getter.parse_data(easy_getter.get_data_for(672286), 672286)
-    anti_pinchazo = Product(**product_data)
-    # ic(bateria.to_sql())
-    # ic(anti_pinchazo.to_sql())
-
-    handler = DBHandler()
-    handler.products.append(bateria)
-    handler.products.append(anti_pinchazo)
-    ic(handler.products)
+    for item in sonax_skus.iterrows():
+        try:
+            sku, store = item[1][["sku", "store"]]
+            match store:
+                case "sodimac":
+                    sku = sku.replace("-", "")
+                    raw_data = sodimac_getter.get_data_for(sku)
+                    ready_data = sodimac_getter.parse_data(raw_data)
+                case "easy":
+                    raw_data = easy_getter.get_data_for(sku)
+                    ready_data = easy_getter.parse_data(raw_data, sku)
+                case _:
+                    print(f"There is no store {store} registered.")
+                    continue
+        except Exception as error:
+            print(type(error))
+            print(f"Could not find sku {sku} from {store}")
+            errors += 1
+            continue
+        handler.products.append(Product(**ready_data))
+        sleep(randint(1, 10))
+    print((errors, len(handler.products)), len(sonax_skus[sonax_skus["store"]==("sodimac" or "easy")]))
+    # # ic(handler.products)
     handler.create_table("product")
     handler.insert_items()
     handler.execute_commands()

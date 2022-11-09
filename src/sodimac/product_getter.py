@@ -18,6 +18,7 @@ def get_page_data(sku):
         product_url = f'https://www.falabella.com/falabella-cl/search?Ntt={sku}'
         # Based on https://es.stackoverflow.com/questions/545411/scrap-con-beautifulsoup-pero-no-obtengo-toda-la-info-los-selectores-son-multicl
         request = requests.get(product_url)
+        ic(request)
         soup = BeautifulSoup(request.text, "lxml")
         return soup
 
