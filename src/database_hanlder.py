@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-import psycopg2
 import snowflake.connector
 from icecream import ic
 
@@ -32,7 +31,7 @@ def connect():
 
         cursor = connection.cursor()
 
-    except (Exception, psycopg2.DatabaseError, psycopg2.OperationalError) as error:
+    except Exception as error:
         ic("Encountered an error trying to connect to the database:")
         ic(error)
         if connection:
@@ -107,11 +106,8 @@ class DBHandler:
             try:
                 self.cursor.execute(ic(sql_command))
                 self.__connection.commit()
-            except psycopg2.errors.DuplicateTable:
-                # Added IF NOT EXISTS to create command, 
-                # so this exception should not happen 
-                ic("The table already exists: Command Skipped")
-            except psycopg2.errors.InFailedSqlTransaction as error:
+
+            except Exception as error:
                 self.error = error
                 ic(error)
     
