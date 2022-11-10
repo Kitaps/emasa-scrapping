@@ -50,6 +50,7 @@ def parse_data(raw_data, sku):
         "image_at": raw_data["image"],
         "price": raw_data["offers"]["offers"][0]["price"],
         "url": raw_data["@id"],
+        "store": "easy",
         "specifications": None} # For now there are no extra specifications, 
                                 # these must be found on the url page of the product
     return kwargs

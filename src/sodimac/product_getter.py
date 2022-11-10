@@ -46,7 +46,8 @@ def parse_data(raw_data):
         "image_at": raw_data["variants"][0]["medias"][0]["url"],
         "price": clean(raw_data["variants"][0]["prices"][0]["price"][0]),
         "url": raw_data["shareIcons"][0]["url"],
-        "specifications": trim(raw_data["attributes"]["specifications"])}
+        "specifications": trim(raw_data["attributes"]["specifications"]),
+        "store": "sodimac"}
     return kwargs
 
 def trim(raw_specifications):

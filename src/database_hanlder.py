@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 import psycopg2
 import snowflake.connector
 from icecream import ic
@@ -47,6 +48,7 @@ class DBHandler:
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
         self.products = list() # Temporary products fetched and to be add to db
         self.commands = list()
+        self.date = str(datetime.date(datetime.today()))
         self.error = None # Last error encountered
 
         SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
@@ -65,6 +67,8 @@ class DBHandler:
             price INTEGER NOT NULL,
             sku VARCHAR(15),
             brand VARCHAR(255),
+            date DATE, 
+            store VARCHAR(10),
             url VARCHAR(2083),
             image_at VARCHAR(2083),
             description TEXT
@@ -75,25 +79,27 @@ class DBHandler:
         self.table_name = f"{name}s"
 
     def insert_items(self):
-
         for product in self.products:
             # Prepare the command to insert the items
             # Add extra columns to table to fit all extra product specifications
             keys, values = list(), list()
-            if product.specifications:
-                keys = list(product.specifications.keys())
-                values = product.specifications.values()
-            for spec in keys:
-                self.commands.append(f"ALTER TABLE products ADD COLUMN IF NOT EXISTS {spec} VARCHAR(255);")
+
+            # Disable this for now, because this query is not supported by snowflake
+            # if product.specifications:
+            #     keys = list(product.specifications.keys())
+            #     values = product.specifications.values()
+            # for spec in keys:
+            #     self.commands.append(f"ALTER TABLE products ADD COLUMN IF NOT EXISTS {spec} VARCHAR(255);")
             # Add the product row
+            
             keys.insert(0, "") # We add an empty string so that after the join the keys_str looks like:
                                # ", First, Second, ..., Last"
             keys_str = ", ".join(keys)
             sql_command = f"""INSERT INTO 
-            products(name, price, sku, brand, url, image_at, description{keys_str}) 
+            products(name, price, sku, brand, date, store, url, image_at, description{keys_str}) 
             VALUES{
-                (product.name, product.price, product.sku, product.brand, 
-                product.url, product.image_at, product.description, *values)};"""
+                (product.name, product.price, product.sku, product.brand, self.date,
+                product.store, product.url, product.image_at, product.description, *values)};"""
             self.commands.append(sql_command)
         
     def execute_commands(self):
