@@ -33,7 +33,8 @@
 - `icecream`: returns better print results
 - `lxml`: parses the soup so it can be navigated with BeautifulSoup
 - `pandas`: preprocess data as dataframes
-- `snowflake-connector-python`: connect to the snowflake SQL server
+- `snowflake-connector-python`: connects to the snowflake SQL server
+- `xlrd`: reads excel documents
 
 
 ## Useful Commands
