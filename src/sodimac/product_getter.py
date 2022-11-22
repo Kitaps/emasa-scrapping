@@ -18,6 +18,7 @@ def get_page_data(sku):
         product_url = f'https://www.falabella.com/falabella-cl/search?Ntt={sku}'
         # Based on https://es.stackoverflow.com/questions/545411/scrap-con-beautifulsoup-pero-no-obtengo-toda-la-info-los-selectores-son-multicl
         request = requests.get(product_url)
+        ic(request)
         soup = BeautifulSoup(request.text, "lxml")
         return soup
 
@@ -45,7 +46,8 @@ def parse_data(raw_data):
         "image_at": raw_data["variants"][0]["medias"][0]["url"],
         "price": clean(raw_data["variants"][0]["prices"][0]["price"][0]),
         "url": raw_data["shareIcons"][0]["url"],
-        "specifications": trim(raw_data["attributes"]["specifications"])}
+        "specifications": trim(raw_data["attributes"]["specifications"]),
+        "store": "sodimac"}
     return kwargs
 
 def trim(raw_specifications):
@@ -53,7 +55,7 @@ def trim(raw_specifications):
     # [{'id': 'Marca', 'name': 'Marca', 'value': 'Mamut'},
     # {'id': 'Largo_de_la_rosca', 'name': 'Largo de la rosca', 'value': '2 "'},
     # {'id': 'Diámetro', 'name': 'Diámetro', 'value': '1/4 "'}]
-    # and resturns it as 
+    # and resturns it as key: value
     # {"Marca": "Mamut",
     # "Largo_de_la_rosca": "2 "",
     # "Diámetro": 1/4 ""}

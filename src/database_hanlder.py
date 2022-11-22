@@ -1,30 +1,37 @@
 import os
-import psycopg2
+from datetime import datetime
+import snowflake.connector
 from icecream import ic
 
 
 def connect():
     # Instead of doing it with environment variables it could also be done with
     # a database.ini to be read with ConfigParser
-    USER = os.environ.get('USER')
-    KAGI = os.environ.get('KAGI')
-    PRODUCTSDB = os.environ.get('PRODUCTSDB')
-    HOST = os.environ.get('HOST')
+    SFUSER = os.environ.get('SFUSER')
+    SFKAGI = os.environ.get('SFKAGI')
+    SFACCOUNT = os.environ.get("SFACCOUNT")
+    SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
+    SFDATABASE = os.environ.get("SFDATABASE")
+    SFSCHEMA = os.environ.get("SFSCHEMA")
+    SFROLE = os.environ.get("SFROLE")
+    
     # If psql PORT is not the default(5432) add the port variable to activate and to connect
 
     # Based on postgresqltutorial.com
-    connection = None
-    cursor = None
     try: 
-        connection = psycopg2.connect(
-            host = ic(HOST),
-            password = KAGI, # We dont print the KAGI to keep it safe
-            database = ic(PRODUCTSDB),
-            user = ic(USER))
+        connection = snowflake.connector.connect(
+                user=ic(SFUSER),
+                password=SFKAGI,
+                account=ic(SFACCOUNT),
+                warehouse=ic(SFWAREHOUSE),
+                database=ic(SFDATABASE),
+                schema=ic(".".join((SFDATABASE, SFSCHEMA))),
+                role=ic(SFROLE)
+                )
 
         cursor = connection.cursor()
 
-    except (Exception, psycopg2.DatabaseError, psycopg2.OperationalError) as error:
+    except Exception as error:
         ic("Encountered an error trying to connect to the database:")
         ic(error)
         if connection:
@@ -40,45 +47,67 @@ class DBHandler:
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
         self.products = list() # Temporary products fetched and to be add to db
         self.commands = list()
+        self.date = str(datetime.date(datetime.today()))
         self.error = None # Last error encountered
+
+        SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
+        SFDATABASE = os.environ.get("SFDATABASE")
+        SFSCHEMA = os.environ.get("SFSCHEMA")
+
+        self.commands.append(f"USE WAREHOUSE {SFWAREHOUSE}")
+        self.commands.append(f"USE DATABASE {SFDATABASE}") 
+        self.commands.append(f"USE SCHEMA {SFDATABASE}.{SFSCHEMA}")
+        
 
     # SQL commands
     def create_table(self, name): # Name should be always be singular
         sql_command = f"""CREATE TABLE IF NOT EXISTS {name}s (
-            {name}_id SERIAL PRIMARY KEY,
-            {name}_name VARCHAR(255) NOT NULL
-            )
+            name VARCHAR(255) NOT NULL,
+            price INTEGER NOT NULL,
+            sku VARCHAR(15),
+            brand VARCHAR(255),
+            date DATE, 
+            store VARCHAR(10),
+            url VARCHAR(2083),
+            image_at VARCHAR(2083),
+            description TEXT
+            );
             """
         # Save the command to queue and the table name for further use
         self.commands.append(sql_command)
         self.table_name = f"{name}s"
 
     def insert_items(self):
-        # Define if products will be a list or dict
-        sql_command = "INSERT INTO products(product_name) VALUES(%s)"
-        self.commands.append(sql_command)
+        for product in self.products:
+            # Prepare the command to insert the items
+            # Add extra columns to table to fit all extra product specifications
+            keys, values = list(), list()
+
+            # Disable this for now, because this query is not supported by snowflake
+            # if product.specifications:
+            #     keys = list(product.specifications.keys())
+            #     values = product.specifications.values()
+            # for spec in keys:
+            #     self.commands.append(f"ALTER TABLE products ADD COLUMN IF NOT EXISTS {spec} VARCHAR(255);")
+            # Add the product row
+            
+            keys.insert(0, "") # We add an empty string so that after the join the keys_str looks like:
+                               # ", First, Second, ..., Last"
+            keys_str = ", ".join(keys)
+            sql_command = f"""INSERT INTO 
+            products(name, price, sku, brand, date, store, url, image_at, description{keys_str}) 
+            VALUES{
+                (product.name, product.price, product.sku, product.brand, self.date,
+                product.store, product.url, product.image_at, product.description, *values)};"""
+            self.commands.append(sql_command)
         
     def execute_commands(self):
         for sql_command in self.commands:
             try:
-                if sql_command[0:6] == 'INSERT':
-                    # If the command starts with I it means it is an INSERT command
-                    cursor, connection = connect()
-                    # The multiprocessing needs it's own connection
-                    # Thats why we connect and disconect in this scope
-                    # !! Documentation says that a loop would be as efficient as executemany in the current version!!
-                    cursor.executemany(sql_command, self.products)
-                    self.save_and_disconnect(cursor, connection) 
-                elif sql_command[0:6] == 'CREATE':
-                    self.cursor.execute(sql_command)
-                    self.__connection.commit()
-                else:
-                    self.cursor.execute(sql_command)
-            except psycopg2.errors.DuplicateTable:
-                # Added IF NOT EXISTS to create command, 
-                # so this exception should not happen 
-                ic("The table already exists: Command Skipped")
-            except psycopg2.errors.InFailedSqlTransaction as error:
+                self.cursor.execute(ic(sql_command))
+                self.__connection.commit()
+
+            except Exception as error:
                 self.error = error
                 ic(error)
     
@@ -97,20 +126,20 @@ class DBHandler:
 
     
 if __name__ == "__main__":
-    example_products = [
-        ('AKM Semiconductor Inc.',),
-        ('Asahi Glass Co Ltd.',),
-        ('Daikin Industries Ltd.',),
-        ('Dynacast International Inc.',),
-        ('Foster Electric Co. Ltd.',),
-        ('Murata Manufacturing Co. Ltd.',)
-    ]
+    import sys
+    from os.path import dirname, realpath
+    sys.path.append(dirname(dirname(realpath(__file__))))
+    
+    from src.products import Product
 
     handler = DBHandler()
-    handler.products = example_products
+    example_product = Product("Martillo", "42", "Bosch", "Super Martillo", "24", "https://i.kym-cdn.com/entries/icons/original/000/000/615/BANHAMMER.png", "1990", "www.sodimac.cl", [])
+    
+    handler.products.append(example_product)
 
     handler.create_table("product")
     handler.insert_items()
     handler.execute_commands()
+    handler.save_and_disconnect()
         
     

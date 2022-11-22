@@ -29,9 +29,13 @@
 
 ## Used Libraries
 - `requests`: provides easy requests to webpages to get html responses
-- `BeautifulSoup`: makes reading html strings easier
+- `BeautifulSoup`: makes reading and parsing html strings easier
 - `icecream`: returns better print results
 - `lxml`: parses the soup so it can be navigated with BeautifulSoup
+- `pandas`: preprocess data as dataframes
+- `snowflake-connector-python`: connects to the snowflake SQL server
+- `xlrd`: reads excel documents
+
 
 ## Useful Commands
 - PostgreSQL

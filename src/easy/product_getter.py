@@ -19,6 +19,7 @@ def get_page_data(sku):
         product_url = f'https://www.easy.cl/{sku}'
         # Based on https://es.stackoverflow.com/questions/545411/scrap-con-beautifulsoup-pero-no-obtengo-toda-la-info-los-selectores-son-multicl
         request = requests.get(product_url)
+        ic(request)
         soup = BeautifulSoup(request.text, "lxml")
         return soup
 
@@ -49,6 +50,7 @@ def parse_data(raw_data, sku):
         "image_at": raw_data["image"],
         "price": raw_data["offers"]["offers"][0]["price"],
         "url": raw_data["@id"],
+        "store": "easy",
         "specifications": None} # For now there are no extra specifications, 
                                 # these must be found on the url page of the product
     return kwargs

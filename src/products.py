@@ -1,18 +1,21 @@
 class Product:
 
-    def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications ) -> None:
+    def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications, store) -> None:
         self.name = name
-        self.product_id = product_id
+        self.store_product_id = product_id
         self.brand = brand
         self.description = description
         self.sku = sku
         self.image_at = image_at
         self.price = price
         self.url = url
+        # specifications = {item1_key: item1_value, ..., itemn_key: itemn_value}
         self.specifications = specifications
+        self.store = store
 
     def __str__(self):
         return f"{self.name}: ${self.price}"
+
 
 if __name__ == "__main__":
     import sodimac.product_getter as sodimac_getter
