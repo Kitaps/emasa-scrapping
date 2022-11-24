@@ -34,6 +34,8 @@
 - `lxml`: parses the soup so it can be navigated with BeautifulSoup
 - `pandas`: preprocess data as dataframes
 - `snowflake-connector-python`: connects to the snowflake SQL server
+- `SQLAlchemy`: help reading from and writing to snowflake SQL server
+    -`greenlet`
 - `xlrd`: reads excel documents
 
 
@@ -44,5 +46,6 @@
     - Login with default user: `psql -U postgres`
     - Check psql server port: `SELECT * FROM pg_settings WHERE name = 'port';`
 
-## Deprecation notices
-Since sales wants to search for products by ID instead of by category, development of the get_category module has stopped for sodimac (and not started for easy).
+## Notes
+- Deprecated: Since sales wants to search for products by ID instead of by category, development of the get_category module has stopped for sodimac (and not started for easy).
+- SQL: [Snowflake does not support conditional T-SQL statements.](https://stackoverflow.com/questions/62524218/how-to-write-an-equivalent-if-else-adhoc-sql-query-in-snowflake) Which means that it accepts IF and IFF statements, but can only return values, not actions.

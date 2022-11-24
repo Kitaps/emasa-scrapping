@@ -16,6 +16,25 @@ class Product:
     def __str__(self):
         return f"{self.name}: ${self.price}"
 
+    
+
+    def export_dict(self):
+        atribute_json = {
+            "NAME": self.name,
+            "STORE_PRODUCT_ID": self.store_product_id,
+            "BRAND": self.brand,
+            "DESCRIPTION": self.description,
+            "SKU": self.sku,
+            "IMAGE_AT": self.image_at,
+            "PRICE": self.price,
+            "STORE": self.store,
+        }
+        # Update the atributes dict with the specs as attributes to be uploaded to DF
+        # We want the keys to be in uppercase
+        specs = dict(zip(map(lambda key: key.upper(), self.specifications.keys()), self.specifications.values()))
+        atribute_json.update(specs)
+        return atribute_json
+
 
 if __name__ == "__main__":
     import sodimac.product_getter as sodimac_getter

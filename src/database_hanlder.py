@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
 import snowflake.connector
+from snowflake.connector.pandas_tools import pd_writer
 from icecream import ic
 
 
@@ -47,8 +47,8 @@ class DBHandler:
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
         self.products = list() # Temporary products fetched and to be add to db
         self.commands = list()
-        self.date = str(datetime.date(datetime.today()))
         self.error = None # Last error encountered
+        self.insertor = None
 
         SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
         SFDATABASE = os.environ.get("SFDATABASE")
@@ -78,29 +78,22 @@ class DBHandler:
         self.table_name = f"{name}s"
 
     def insert_items(self):
-        for product in self.products:
-            # Prepare the command to insert the items
-            # Add extra columns to table to fit all extra product specifications
-            keys, values = list(), list()
+        # Creates the db insertion query with insertor
+        self.insertor.build_insert_query()
+        # Execute previous commands, to complete table with columns 
+        # that may be missing
+        self.execute_commands()
+        # Do the insertion (with SQL ALquemy)
+        self.insertor.df.to_sql(
+            name = "products",
+            con = self.__connection,
+            schema = os.environ.get("SFSCHEMA"),
+            if_exists = "append",
+            index = False,
+            chunksize = self.insertor.max_size,
+            method = pd_writer
+        )
 
-            # Disable this for now, because this query is not supported by snowflake
-            # if product.specifications:
-            #     keys = list(product.specifications.keys())
-            #     values = product.specifications.values()
-            # for spec in keys:
-            #     self.commands.append(f"ALTER TABLE products ADD COLUMN IF NOT EXISTS {spec} VARCHAR(255);")
-            # Add the product row
-            
-            keys.insert(0, "") # We add an empty string so that after the join the keys_str looks like:
-                               # ", First, Second, ..., Last"
-            keys_str = ", ".join(keys)
-            sql_command = f"""INSERT INTO 
-            products(name, price, sku, brand, date, store, url, image_at, description{keys_str}) 
-            VALUES{
-                (product.name, product.price, product.sku, product.brand, self.date,
-                product.store, product.url, product.image_at, product.description, *values)};"""
-            self.commands.append(sql_command)
-        
     def execute_commands(self):
         for sql_command in self.commands:
             try:
@@ -110,6 +103,8 @@ class DBHandler:
             except Exception as error:
                 self.error = error
                 ic(error)
+        # Clean already executed commands
+        self.commands = list()
     
     def save_and_disconnect(self, cursor=None, connection=None):
         if cursor == None: cursor = self.cursor
@@ -124,6 +119,23 @@ class DBHandler:
         if connection: connection.close()
         ic("Connection to database closed.")
 
+    def get_headers(self):
+        # Gets the table metadate and returns a set with the headers
+        metadata = self.cursor.describe("SELECT * FROM products")
+        return set(col.name for col in metadata)
+
+    def append(self, product):
+        self.products.append(product)
+        self.insertor.append(product)
+
+    def add_insertor(self, insert_builder):
+        self.insertor = insert_builder
+        self.insertor.headers = self.get_headers()
+        self.insertor.db_handler = self
+        
+
+
+
     
 if __name__ == "__main__":
     import sys
@@ -131,15 +143,22 @@ if __name__ == "__main__":
     sys.path.append(dirname(dirname(realpath(__file__))))
     
     from src.products import Product
+    from src.insert_builder import InsertBuilder
 
     handler = DBHandler()
-    example_product = Product("Martillo", "42", "Bosch", "Super Martillo", "24", "https://i.kym-cdn.com/entries/icons/original/000/000/615/BANHAMMER.png", "1990", "www.sodimac.cl", [])
+    handler.add_insertor(InsertBuilder())    
     
-    handler.products.append(example_product)
+    example_product = Product("Martillo", "42", "Bosch", "Super Martillo", "24", "https://i.kym-cdn.com/entries/icons/original/000/000/615/BANHAMMER.png", "1990", "www.sodimac.cl", {}, "SODIMAC")
+    
+    handler.append(example_product)
 
     handler.create_table("product")
     handler.insert_items()
     handler.execute_commands()
+    
+
+    print(handler.get_headers())
+
     handler.save_and_disconnect()
         
     
