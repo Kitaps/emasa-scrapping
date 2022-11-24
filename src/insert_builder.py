@@ -1,5 +1,6 @@
 import pandas
 from datetime import datetime
+from icecream import ic
 
 class InsertBuilder:
     insertion_count = 0
@@ -24,11 +25,11 @@ class InsertBuilder:
     def parse_insertion(self, product):
         # Prepare the command to insert the items
         # Add extra columns to table to fit all extra product specifications
-        product_dict =  product.export_dict()
-        keys = product_dict.keys()
-        for new_spec in (set(keys)-self.headers):
+        product_dict =  ic(product.export_dict())
+        keys = set(product_dict.keys())
+        for new_spec in (keys-self.headers):
             self.db_handler.commands.append(f"ALTER TABLE products ADD COLUMN {new_spec} VARCHAR(255);")
-            self.df.add(new_spec)
+            self.headers.update(keys)
         return product_dict
 
     def build_insert_query(self):
