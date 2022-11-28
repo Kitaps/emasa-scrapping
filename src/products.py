@@ -13,7 +13,7 @@ class Product:
         self.specifications = specifications
         self.store = store
 
-    def __str__(self):
+    def __repr__(self):
         return f"{self.name}: ${self.price}"
 
     
@@ -31,8 +31,9 @@ class Product:
         }
         # Update the atributes dict with the specs as attributes to be uploaded to DF
         # We want the keys to be in uppercase
-        specs = dict(zip(map(lambda key: key.upper(), self.specifications.keys()), self.specifications.values()))
-        atribute_json.update(specs)
+        if self.specifications:
+            specs = dict(zip(map(lambda key: key.upper(), self.specifications.keys()), self.specifications.values()))
+            atribute_json.update(specs)
         return atribute_json
 
 

@@ -1,5 +1,4 @@
 import os
-from snowflake.connector.pandas_tools import pd_writer
 from snowflake.sqlalchemy import URL
 from sqlalchemy import create_engine, text
 from icecream import ic
@@ -85,15 +84,9 @@ class DBHandler:
         # that may be missing
         self.execute_commands()
         # Do the insertion (with SQL ALquemy)
-        self.insertor.df.to_sql(
-            name = "products",
-            con = self.__connection,
-            schema = os.environ.get("SFSCHEMA"),
-            if_exists = "append",
-            index = False,
-            chunksize = self.insertor.max_size,
-            method = pd_writer
-        )
+        ic("Try")
+        self.insertor.send_insert_query(self.__connection, os.environ.get("SFSCHEMA"))
+        ic("FiniishUUUUUUUUUUUUUUUUUUUUUUUU")
 
     def execute_commands(self):
         for sql_command in self.commands:
@@ -110,6 +103,7 @@ class DBHandler:
         if connection == None: connection = self.__connection
         if engine == None: engine = self.__engine
         # Save changes if no error
+        connection.execute(text("COMMIT"))
         if connection: connection.close()
         if engine: engine.dispose()
         ic("Connection to database closed.")
@@ -120,8 +114,10 @@ class DBHandler:
     #     return set(col.name for col in metadata)
 
     def append(self, product):
-        self.products.append(product)
+        ic(product)
         self.insertor.append(product)
+        self.products.append(product)
+        
 
     def add_insertor(self, insert_builder):
         self.insertor = insert_builder
