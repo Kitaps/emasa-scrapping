@@ -1,6 +1,7 @@
 import os
-from snowflake.sqlalchemy import URL
-from sqlalchemy import create_engine, text
+# from snowflake.sqlalchemy import URL
+# from sqlalchemy import create_engine, text
+import snowflake.connector
 from icecream import ic
 
 
@@ -15,35 +16,47 @@ def connect():
     SFSCHEMA = os.environ.get("SFSCHEMA")
     SFROLE = os.environ.get("SFROLE")
 
-    url = URL(
-                user=ic(SFUSER),
-                password=SFKAGI,
-                account=ic(SFACCOUNT),
-                warehouse=ic(SFWAREHOUSE),
-                database=ic(SFDATABASE),
-                schema=ic(".".join((SFDATABASE, SFSCHEMA))),
-                role=ic(SFROLE)
-                )    
+    # url = URL(
+    #             user=ic(SFUSER),
+    #             password=SFKAGI,
+    #             account=ic(SFACCOUNT),
+    #             warehouse=ic(SFWAREHOUSE),
+    #             database=ic(SFDATABASE),
+    #             schema=ic(".".join((SFDATABASE, SFSCHEMA))),
+    #             role=ic(SFROLE)
+    #             )    
     # If psql PORT is not the default(5432) add the port variable to activate and to connect
 
     # Based on postgresqltutorial.com
     try: 
-        engine = create_engine(url, future=True) # future is to autocommit executions
-        connection = engine.connect()
+        # engine = create_engine(url, future=True) # future is to autocommit executions
+        # connection = engine.connect()
+        connection = snowflake.connector.connect(
+            user=ic(SFUSER),
+            password=SFKAGI,
+            account=ic(SFACCOUNT),
+            warehouse=ic(SFWAREHOUSE),
+            database=ic(SFDATABASE),
+            schema=ic(".".join((SFDATABASE, SFSCHEMA))),
+            role=ic(SFROLE)
+        )
+
+        cursor = connection.cursor()
 
     except Exception as error:
         ic("Encountered an error trying to connect to the database:")
         ic(error)
         if connection:
             connection.close()
-            engine.dispose()
+            # engine.dispose()
 
-    return connection, engine
+    # return connection, engine
+    return cursor, connection
 
 
 class DBHandler:
     def __init__(self):
-        self.__connection, self.__engine = connect()
+        self.cursor, self.__connection = connect()
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
         self.products = list() # Temporary products fetched and to be add to db
         self.commands = list()
@@ -91,7 +104,9 @@ class DBHandler:
     def execute_commands(self):
         for sql_command in self.commands:
             try:
-                self.__connection.execute(text(ic(sql_command)))
+                self.cursor.execute(ic(sql_command))
+                self.__connection.commit()
+                # self.__connection.execute(text(ic(sql_command)))
 
             except Exception as error:
                 self.error = error
@@ -99,13 +114,16 @@ class DBHandler:
         # Clean already executed commands
         self.commands = list()
     
-    def save_and_disconnect(self, connection=None, engine=None):
+    def save_and_disconnect(self, connection=None, cursor=None):
         if connection == None: connection = self.__connection
-        if engine == None: engine = self.__engine
+        # if engine == None: engine = self.__engine
+        if cursor == None: cursor = self.cursor
         # Save changes if no error
-        connection.execute(text("COMMIT"))
+        connection.commit()
+        # connection.execute(text("COMMIT"))
+        if cursor: cursor.close()
         if connection: connection.close()
-        if engine: engine.dispose()
+        # if engine: engine.dispose()
         ic("Connection to database closed.")
 
     # def get_headers(self):
