@@ -1,5 +1,6 @@
 import os
-from datetime import datetime
+# from snowflake.sqlalchemy import URL
+# from sqlalchemy import create_engine, text
 import snowflake.connector
 from icecream import ic
 
@@ -14,20 +15,31 @@ def connect():
     SFDATABASE = os.environ.get("SFDATABASE")
     SFSCHEMA = os.environ.get("SFSCHEMA")
     SFROLE = os.environ.get("SFROLE")
-    
+
+    # url = URL(
+    #             user=ic(SFUSER),
+    #             password=SFKAGI,
+    #             account=ic(SFACCOUNT),
+    #             warehouse=ic(SFWAREHOUSE),
+    #             database=ic(SFDATABASE),
+    #             schema=ic(".".join((SFDATABASE, SFSCHEMA))),
+    #             role=ic(SFROLE)
+    #             )    
     # If psql PORT is not the default(5432) add the port variable to activate and to connect
 
     # Based on postgresqltutorial.com
     try: 
+        # engine = create_engine(url, future=True) # future is to autocommit executions
+        # connection = engine.connect()
         connection = snowflake.connector.connect(
-                user=ic(SFUSER),
-                password=SFKAGI,
-                account=ic(SFACCOUNT),
-                warehouse=ic(SFWAREHOUSE),
-                database=ic(SFDATABASE),
-                schema=ic(".".join((SFDATABASE, SFSCHEMA))),
-                role=ic(SFROLE)
-                )
+            user=ic(SFUSER),
+            password=SFKAGI,
+            account=ic(SFACCOUNT),
+            warehouse=ic(SFWAREHOUSE),
+            database=ic(SFDATABASE),
+            schema=ic(".".join((SFDATABASE, SFSCHEMA))),
+            role=ic(SFROLE)
+        )
 
         cursor = connection.cursor()
 
@@ -35,42 +47,43 @@ def connect():
         ic("Encountered an error trying to connect to the database:")
         ic(error)
         if connection:
-            connection.rollback()
             connection.close()
+            # engine.dispose()
 
+    # return connection, engine
     return cursor, connection
 
 
 class DBHandler:
+    SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
+    SFDATABASE = os.environ.get("SFDATABASE")
+    SFSCHEMA = os.environ.get("SFSCHEMA")
+
     def __init__(self):
         self.cursor, self.__connection = connect()
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
         self.products = list() # Temporary products fetched and to be add to db
         self.commands = list()
-        self.date = str(datetime.date(datetime.today()))
         self.error = None # Last error encountered
+        self.insertor = None
 
-        SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
-        SFDATABASE = os.environ.get("SFDATABASE")
-        SFSCHEMA = os.environ.get("SFSCHEMA")
-
-        self.commands.append(f"USE WAREHOUSE {SFWAREHOUSE}")
-        self.commands.append(f"USE DATABASE {SFDATABASE}") 
-        self.commands.append(f"USE SCHEMA {SFDATABASE}.{SFSCHEMA}")
+        self.commands.append(f"USE WAREHOUSE {DBHandler.SFWAREHOUSE}")
+        self.commands.append(f"USE DATABASE {DBHandler.SFDATABASE}") 
+        self.commands.append(f"USE SCHEMA {DBHandler.SFDATABASE}.{DBHandler.SFSCHEMA}")
         
 
     # SQL commands
     def create_table(self, name): # Name should be always be singular
         sql_command = f"""CREATE TABLE IF NOT EXISTS {name}s (
-            name VARCHAR(255) NOT NULL,
-            price INTEGER NOT NULL,
-            sku VARCHAR(15),
-            brand VARCHAR(255),
-            date DATE, 
-            store VARCHAR(10),
-            url VARCHAR(2083),
-            image_at VARCHAR(2083),
-            description TEXT
+            NAME VARCHAR(255) NOT NULL,
+            PRICE INTEGER NOT NULL,
+            SKU VARCHAR(15),
+            BRAND VARCHAR(255),
+            DATE DATE, 
+            STORE VARCHAR(10),
+            URL VARCHAR(2083),
+            IMAGE_AT VARCHAR(2083),
+            DESCRIPTION TEXT
             );
             """
         # Save the command to queue and the table name for further use
@@ -78,51 +91,57 @@ class DBHandler:
         self.table_name = f"{name}s"
 
     def insert_items(self):
-        for product in self.products:
-            # Prepare the command to insert the items
-            # Add extra columns to table to fit all extra product specifications
-            keys, values = list(), list()
+        # Creates the db insertion query with insertor
+        self.insertor.build_insert_query()
+        # Execute previous commands, to complete table with columns 
+        # that may be missing
+        self.execute_commands()
+        # Do the insertion (with SQL ALquemy)
+        self.insertor.send_insert_query(self.__connection, "products", DBHandler.SFDATABASE, DBHandler.SFSCHEMA)
 
-            # Disable this for now, because this query is not supported by snowflake
-            # if product.specifications:
-            #     keys = list(product.specifications.keys())
-            #     values = product.specifications.values()
-            # for spec in keys:
-            #     self.commands.append(f"ALTER TABLE products ADD COLUMN IF NOT EXISTS {spec} VARCHAR(255);")
-            # Add the product row
-            
-            keys.insert(0, "") # We add an empty string so that after the join the keys_str looks like:
-                               # ", First, Second, ..., Last"
-            keys_str = ", ".join(keys)
-            sql_command = f"""INSERT INTO 
-            products(name, price, sku, brand, date, store, url, image_at, description{keys_str}) 
-            VALUES{
-                (product.name, product.price, product.sku, product.brand, self.date,
-                product.store, product.url, product.image_at, product.description, *values)};"""
-            self.commands.append(sql_command)
-        
     def execute_commands(self):
         for sql_command in self.commands:
             try:
                 self.cursor.execute(ic(sql_command))
                 self.__connection.commit()
+                # self.__connection.execute(text(ic(sql_command)))
 
             except Exception as error:
                 self.error = error
                 ic(error)
+        # Clean already executed commands
+        self.commands = list()
     
-    def save_and_disconnect(self, cursor=None, connection=None):
-        if cursor == None: cursor = self.cursor
+    def save_and_disconnect(self, connection=None, cursor=None):
         if connection == None: connection = self.__connection
-        if cursor: cursor.close()
+        # if engine == None: engine = self.__engine
+        if cursor == None: cursor = self.cursor
         # Save changes if no error
-        if not self.error: connection.commit()
-        else:
-            ic(f"Can't save changes due to error:\n {self.error}")
-            connection.rollback()
-
+        connection.commit()
+        # connection.execute(text("COMMIT"))
+        if cursor: cursor.close()
         if connection: connection.close()
+        # if engine: engine.dispose()
         ic("Connection to database closed.")
+
+    # def get_headers(self):
+    #     # Gets the table metadate and returns a set with the headers
+    #     metadata = self.cursor.describe("SELECT * FROM products")
+    #     return set(col.name for col in metadata)
+
+    def append(self, product):
+        ic(product)
+        self.insertor.append(product)
+        self.products.append(product)
+        
+
+    def add_insertor(self, insert_builder):
+        self.insertor = insert_builder
+        # self.insertor.headers = self.get_headers()
+        self.insertor.db_handler = self
+        
+
+
 
     
 if __name__ == "__main__":
@@ -131,15 +150,22 @@ if __name__ == "__main__":
     sys.path.append(dirname(dirname(realpath(__file__))))
     
     from src.products import Product
+    from src.insert_builder import InsertBuilder
 
     handler = DBHandler()
-    example_product = Product("Martillo", "42", "Bosch", "Super Martillo", "24", "https://i.kym-cdn.com/entries/icons/original/000/000/615/BANHAMMER.png", "1990", "www.sodimac.cl", [])
+    handler.add_insertor(InsertBuilder())    
     
-    handler.products.append(example_product)
+    example_product = Product("Martillo", "42", "Bosch", "Super Martillo", "24", "https://i.kym-cdn.com/entries/icons/original/000/000/615/BANHAMMER.png", "1990", "www.sodimac.cl", {}, "SODIMAC")
+    
+    
 
     handler.create_table("product")
+    handler.append(example_product)
+    ic("Hola")
     handler.insert_items()
     handler.execute_commands()
+    
+
     handler.save_and_disconnect()
         
     

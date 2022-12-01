@@ -7,6 +7,7 @@ import src.easy.product_getter as easy_getter
 import src.autoplanet.category_getter as autoplanet_getter
 from src.products import Product
 from src.database_hanlder import DBHandler
+from src.insert_builder import InsertBuilder
 from src.sku_getter import sonax_skus
 
 
@@ -14,6 +15,7 @@ from src.sku_getter import sonax_skus
 def main1():
     errors = 0
     handler = DBHandler() # Create instance of database handler
+    handler.add_insertor(InsertBuilder())
     # We create two example products to try some things
     for item in sonax_skus.iterrows():
         try:
@@ -37,7 +39,7 @@ def main1():
             print(f"Could not find sku {sku} from {store}")
             errors += 1
             continue
-        handler.products.append(Product(**ready_data))
+        handler.append(Product(**ready_data))
         sleep(randint(1, 10))
     print((errors, len(handler.products)), len(sonax_skus[sonax_skus["store"]==("sodimac" or "easy")]))
     # # ic(handler.products)
