@@ -20,7 +20,7 @@ class InsertBuilder:
         self.flavor_schema = self.build_schema()
 
     @staticmethod
-    def build_schema():
+    def build_schema(): # Useless (?)
         schema = pa.schema([
             ('NAME', pa.string()),
             ('PRICE', pa.uint32()),
@@ -55,14 +55,7 @@ class InsertBuilder:
         self.df = pandas.DataFrame(self.products_dic_list)
 
     def send_insert_query(self, connection, table_name, database, schema):
-
-        with open("request_inputs&outputs/dataframes/df_with_error.pkl", "wb") as file:
-            self.df.to_pickle(file)
-
-        with open("request_inputs&outputs\dataframes/df_with_error.csv", "w") as file:
-            self.df.to_csv(file, )
-
-        # table = pa.Table.from_pandas(
+        # table = pa.Table.from_pandas( # Useless
         #     df = self.df,
         #     schema = self.flavor_schema,
         #     preserve_index = False,
@@ -87,16 +80,6 @@ class InsertBuilder:
             chunk_size=self.max_size,
             quote_identifiers=False
         )
-
-        # success, nchunks, nrows, _ = write_pandas(
-        #     conn=connection, 
-        #     df=self.df, 
-        #     table_name='products',
-        #     schema=schema,
-        #     quote_identifiers=False)
-        # ic(success)
-        # ic(nchunks)
-        # ic(nrows)
 
 
         
