@@ -62,10 +62,10 @@ class DBHandler:
     def __init__(self):
         self.cursor, self.__connection = connect()
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
-        self.products = list() # Temporary products fetched and to be add to db
+        self.__products = list() # Temporary products fetched and to be add to db
         self.commands = list()
         self.error = None # Last error encountered
-        self.insertor = None
+        self.__insertor = None
 
         self.commands.append(f"USE WAREHOUSE {DBHandler.SFWAREHOUSE}")
         self.commands.append(f"USE DATABASE {DBHandler.SFDATABASE}") 
@@ -92,12 +92,12 @@ class DBHandler:
 
     def insert_items(self):
         # Creates the db insertion query with insertor
-        self.insertor.build_insert_query()
+        self.__insertor.build_insert_query()
         # Execute previous commands, to complete table with columns 
         # that may be missing
         self.execute_commands()
         # Do the insertion (with SQL ALquemy)
-        self.insertor.send_insert_query(self.__connection, "products", DBHandler.SFDATABASE, DBHandler.SFSCHEMA)
+        self.__insertor.send_insert_query(self.__connection, "products", DBHandler.SFDATABASE, DBHandler.SFSCHEMA)
 
     def execute_commands(self):
         for sql_command in self.commands:
@@ -124,25 +124,25 @@ class DBHandler:
         # if engine: engine.dispose()
         ic("Connection to database closed.")
 
-    # def get_headers(self):
-    #     # Gets the table metadate and returns a set with the headers
-    #     metadata = self.cursor.describe("SELECT * FROM products")
-    #     return set(col.name for col in metadata)
+    def get_headers(self):
+        # Gets the table metadate and returns a set with headers 
+        name_tuples = self.cursor.execute(F"SELECT COLUMN_NAME FROM {DBHandler.SFDATABASE}.information_schema.columns WHERE TABLE_NAME = 'PRODUCTS';")
+        column_names = map(lambda name_tuple: name_tuple[0], name_tuples)
+        return ic(set(column_names))
 
     def append(self, product):
         ic(product)
-        self.insertor.append(product)
-        self.products.append(product)
+        self.__insertor.append(product)
+        self.__products.append(product)
         
+    def extend(self, product_list):
+        for product in product_list:
+            self.append(product)
 
     def add_insertor(self, insert_builder):
-        self.insertor = insert_builder
-        # self.insertor.headers = self.get_headers()
-        self.insertor.db_handler = self
-        
-
-
-
+        self.__insertor = insert_builder
+        self.__insertor.headers = self.get_headers()
+        self.__insertor.db_handler = self
     
 if __name__ == "__main__":
     import sys
@@ -160,10 +160,13 @@ if __name__ == "__main__":
     
 
     handler.create_table("product")
-    handler.append(example_product)
-    ic("Hola")
-    handler.insert_items()
-    handler.execute_commands()
+
+    handler.get_headers()
+
+    # handler.append(example_product)
+    # ic("Hola")
+    # handler.insert_items()
+    # handler.execute_commands()
     
 
     handler.save_and_disconnect()

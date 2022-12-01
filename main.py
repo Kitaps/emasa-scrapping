@@ -16,6 +16,7 @@ def main1():
     errors = 0
     handler = DBHandler() # Create instance of database handler
     handler.add_insertor(InsertBuilder())
+
     # We create two example products to try some things
     for item in sonax_skus.iterrows():
         try:
@@ -41,7 +42,7 @@ def main1():
             continue
         handler.append(Product(**ready_data))
         sleep(randint(1, 10))
-    print((errors, len(handler.products)), len(sonax_skus[sonax_skus["store"]==("sodimac" or "easy")]))
+    print((errors, len(handler.__products)), len(sonax_skus[sonax_skus["store"]==("sodimac" or "easy")]))
     # # ic(handler.products)
     handler.create_table("product")
     handler.insert_items()
@@ -75,7 +76,7 @@ def main2():
 
         ready_data_generator = map(lambda raw_data: autoplanet_getter.parse_data(raw_data), aux_generator)
         product_list = ic(list(map(lambda rd: Product(**rd), ready_data_generator)))
-        handler.products.extend(product_list)
+        handler.__products.extend(product_list)
         # # ic(handler.products)
 
     handler.create_table("product")
@@ -85,5 +86,5 @@ def main2():
 
 
 if __name__ == "__main__":
-    # main1()
-    main2()
+    main1()
+    # main2()
