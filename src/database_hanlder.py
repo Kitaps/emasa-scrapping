@@ -55,6 +55,10 @@ def connect():
 
 
 class DBHandler:
+    SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
+    SFDATABASE = os.environ.get("SFDATABASE")
+    SFSCHEMA = os.environ.get("SFSCHEMA")
+
     def __init__(self):
         self.cursor, self.__connection = connect()
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
@@ -63,27 +67,23 @@ class DBHandler:
         self.error = None # Last error encountered
         self.insertor = None
 
-        SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
-        SFDATABASE = os.environ.get("SFDATABASE")
-        SFSCHEMA = os.environ.get("SFSCHEMA")
-
-        self.commands.append(f"USE WAREHOUSE {SFWAREHOUSE}")
-        self.commands.append(f"USE DATABASE {SFDATABASE}") 
-        self.commands.append(f"USE SCHEMA {SFDATABASE}.{SFSCHEMA}")
+        self.commands.append(f"USE WAREHOUSE {DBHandler.SFWAREHOUSE}")
+        self.commands.append(f"USE DATABASE {DBHandler.SFDATABASE}") 
+        self.commands.append(f"USE SCHEMA {DBHandler.SFDATABASE}.{DBHandler.SFSCHEMA}")
         
 
     # SQL commands
     def create_table(self, name): # Name should be always be singular
         sql_command = f"""CREATE TABLE IF NOT EXISTS {name}s (
-            name VARCHAR(255) NOT NULL,
-            price INTEGER NOT NULL,
-            sku VARCHAR(15),
-            brand VARCHAR(255),
-            date DATE, 
-            store VARCHAR(10),
-            url VARCHAR(2083),
-            image_at VARCHAR(2083),
-            description TEXT
+            NAME VARCHAR(255) NOT NULL,
+            PRICE INTEGER NOT NULL,
+            SKU VARCHAR(15),
+            BRAND VARCHAR(255),
+            DATE DATE, 
+            STORE VARCHAR(10),
+            URL VARCHAR(2083),
+            IMAGE_AT VARCHAR(2083),
+            DESCRIPTION TEXT
             );
             """
         # Save the command to queue and the table name for further use
@@ -97,9 +97,7 @@ class DBHandler:
         # that may be missing
         self.execute_commands()
         # Do the insertion (with SQL ALquemy)
-        ic("Try")
-        self.insertor.send_insert_query(self.__connection, os.environ.get("SFSCHEMA"))
-        ic("FiniishUUUUUUUUUUUUUUUUUUUUUUUU")
+        self.insertor.send_insert_query(self.__connection, "products", DBHandler.SFDATABASE, DBHandler.SFSCHEMA)
 
     def execute_commands(self):
         for sql_command in self.commands:

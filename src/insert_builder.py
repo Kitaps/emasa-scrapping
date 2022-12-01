@@ -9,7 +9,7 @@ from snowflake.connector.pandas_tools import write_pandas
 class InsertBuilder:
     insertion_count = 0
 
-    def __init__(self, max_size=100) -> None:
+    def __init__(self, max_size=None) -> None:
         self.df = pandas.DataFrame()
         self.max_size = max_size
         self.db_handler = None
@@ -54,22 +54,40 @@ class InsertBuilder:
         # Turns the product dict list into a df and sends it to the handler
         self.df = pandas.DataFrame(self.products_dic_list)
 
-    def send_insert_query(self, connection, schema):
-        table = pa.Table.from_pandas(
-            df = self.df,
-            schema = self.flavor_schema,
-            preserve_index = False,
-        )
+    def send_insert_query(self, connection, table_name, database, schema):
+
+        with open("request_inputs&outputs/dataframes/df_with_error.pkl", "wb") as file:
+            self.df.to_pickle(file)
+
+        with open("request_inputs&outputs\dataframes/df_with_error.csv", "w") as file:
+            self.df.to_csv(file, )
+
+        # table = pa.Table.from_pandas(
+        #     df = self.df,
+        #     schema = self.flavor_schema,
+        #     preserve_index = False,
+        # )
         
-        self.df.to_sql(
-            name = "products",
-            con = connection,
-            schema = schema,
-            if_exists = "append",
-            index = False,
-            chunksize = self.max_size,
-            method = pd_writer
+        # self.df.to_sql(
+        #     name = table_name",
+        #     con = connection,
+        #     schema = schema,
+        #     if_exists = "append",
+        #     index = False,
+        #     chunksize = self.max_size,
+        #     method = pd_writer
+        # )
+
+        write_pandas(
+            conn=connection,
+            df=self.df,
+            table_name=table_name,
+            database=database,
+            schema=schema,
+            chunk_size=self.max_size,
+            quote_identifiers=False
         )
+
         # success, nchunks, nrows, _ = write_pandas(
         #     conn=connection, 
         #     df=self.df, 
