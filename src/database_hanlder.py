@@ -2,6 +2,7 @@ import os
 # from snowflake.sqlalchemy import URL
 # from sqlalchemy import create_engine, text
 import snowflake.connector
+from collections import deque
 from icecream import ic
 
 
@@ -63,13 +64,15 @@ class DBHandler:
         self.cursor, self.__connection = connect()
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
         self.__products = list() # Temporary products fetched and to be add to db
-        self.commands = list()
+        self.commands = deque()
         self.error = None # Last error encountered
         self.__insertor = None
 
         self.commands.append(f"USE WAREHOUSE {DBHandler.SFWAREHOUSE}")
         self.commands.append(f"USE DATABASE {DBHandler.SFDATABASE}") 
         self.commands.append(f"USE SCHEMA {DBHandler.SFDATABASE}.{DBHandler.SFSCHEMA}")
+
+        self.create_table("product")
         
 
     # SQL commands

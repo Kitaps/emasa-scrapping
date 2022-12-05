@@ -2,7 +2,7 @@ from random import randint
 from time import sleep
 from itertools import chain
 from icecream import ic
-import src.sodimac.product_getter as sodimac_getter
+import src.sodimac.category_getter as sodimac_getter
 import src.easy.product_getter as easy_getter
 import src.autoplanet.category_getter as autoplanet_getter
 from src.products import Product
@@ -76,7 +76,42 @@ def main2():
 
         ready_data_generator = map(lambda raw_data: autoplanet_getter.parse_data(raw_data), aux_generator)
         product_list = ic(list(map(lambda rd: Product(**rd), ready_data_generator)))
-        handler.__products.extend(product_list)
+        handler.extend(product_list)
+        # # ic(handler.products)
+
+    # handler.create_table("product")
+    handler.insert_items()
+    handler.execute_commands()
+
+def main3(getter):
+    errors = 0
+    handler = DBHandler() # Create instance of database handler
+    handler.add_insertor(InsertBuilder())
+    current_soup = None
+    last_page_number = 0
+    for category in getter.categories:
+        aux_generator = []
+        ic(category)
+
+        current_soup, last_page_number = getter.init_(category)
+        aux_generator = chain([], getter.extract_page_data(current_soup))
+
+        for page_number in range(1, last_page_number):
+            sleep(randint(1, 10))
+            try:
+                ic(f"{page_number} of {last_page_number}")
+                current_soup = getter.get_page_data(category, page_number)
+                current_soup_json = getter.extract_page_data(current_soup)
+                aux_generator = chain(aux_generator, current_soup_json) # Concatenate lists
+            except Exception as error:
+                print(type(error))
+                errors += 1
+                continue
+
+        ready_data_generator = map(lambda raw_data: getter.parse_data(raw_data), aux_generator)
+        product_list = list(map(lambda rd: Product(**rd), ready_data_generator))
+        ic(len(product_list))
+        handler.extend(product_list)
         # # ic(handler.products)
 
     handler.create_table("product")
@@ -86,5 +121,6 @@ def main2():
 
 
 if __name__ == "__main__":
-    main1()
+    # main1()
     # main2()
+    main3(sodimac_getter)

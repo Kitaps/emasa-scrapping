@@ -16,6 +16,8 @@ class Product:
         self.specifications = specifications
         self.store = store
 
+    # Agregar Categoría
+
     def __repr__(self):
         return f"{self.name}: ${self.price}"
 
@@ -24,7 +26,8 @@ class Product:
         string = str(string)
         # If there is a ; remove everything else
         clean_string = string.split(";")[0]
-        return clean_string
+        stripped_string = clean_string.strip()
+        return stripped_string
 
     @staticmethod
     # Todo con RegEx
@@ -34,21 +37,29 @@ class Product:
                 "Í", "I").replace(
                     "É", "E").replace(
                         "Ú", "U").replace(
-                            "Ó", "O").replace("Ñ", "NI")
+                            "Ó", "O").replace(
+                                "Ñ", "NI").replace(
+                                    " ", "_").replace("/", "y").replace(".", "punto")
         return simplified_string
+
+    @staticmethod
+    def crop(string):
+        if len(string) > 255:
+            return f"{string[0:250]}..."
+        else: return string
 
     def export_dict(self):
         atribute_json = {
-            "NAME": self.clean(self.name),
+            "NAME": self.crop(self.clean(self.name)),
             "STORE_PRODUCT_ID": self.clean((self.store_product_id)),
-            "BRAND": self.clean(self.brand),
+            "BRAND": self.crop(self.clean(self.brand)),
             "DATE": self.scrap_date,
             "DESCRIPTION": self.clean(self.description),
             "SKU": self.clean((self.sku)),
             "URL": self.clean(self.url),
-            "IMAGE_AT": self.clean(self.image_at),
+            "IMAGE_AT": self.crop(self.clean(self.image_at)),
             "PRICE": int(self.price),
-            "STORE": self.clean(self.store),
+            "STORE": self.crop(self.clean(self.store)),
         }
         # Update the atributes dict with the specs as attributes to be uploaded to DF
         # We want the keys to be in uppercase
@@ -58,7 +69,7 @@ class Product:
                     lambda key: self.untilde(self.clean(key).upper()), self.specifications.keys()
                 ), 
                 map(
-                    lambda value: self.clean(value), self.specifications.values()
+                    lambda value: self.crop(self.clean(value)), self.specifications.values()
                 )))
             atribute_json.update(specs)
         return atribute_json

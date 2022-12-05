@@ -6,7 +6,7 @@ def load_categories(company_name):
     # Returns the correctly formatted categories (list).
     # Theese are to be used by the corresponding company getter.
     # Theese categorys are saved in the categories json of each company.
-    with open(f"{company_name}_categories.json", 'r') as file:
+    with open(f"categories_{company_name}.json", 'r') as file:
         return json.load(file)
 
 def format_link(string):
