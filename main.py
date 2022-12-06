@@ -108,7 +108,7 @@ def main3(getter):
                 errors += 1
                 continue
 
-        ready_data_generator = map(lambda raw_data: getter.parse_data(raw_data), aux_generator)
+        ready_data_generator = map(lambda raw_data: getter.parse_data(raw_data, category), aux_generator)
         product_list = list(map(lambda rd: Product(**rd), ready_data_generator))
         ic(len(product_list))
         handler.extend(product_list)

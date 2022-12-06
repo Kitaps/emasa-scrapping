@@ -65,7 +65,7 @@ def get_products_json(soup_json):
     # We explore the soup_json until fe find the products list
     return soup_json["props"]["pageProps"]["results"]
 
-def parse_data(raw_data):
+def parse_data(raw_data, category):
     # Turn dic into defaultdic that returns None on key error
     raw_data = defaultdict(lambda:None, raw_data)
     extra_specs = list()
@@ -82,6 +82,7 @@ def parse_data(raw_data):
         "price": price,
         "url": raw_data["url"],
         "store": "sodimac",
+        "category": category,
         "specifications": {
             "productType": raw_data["productType"],
             "prices": raw_data[price_key],

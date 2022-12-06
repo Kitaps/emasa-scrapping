@@ -84,6 +84,7 @@ class DBHandler:
             BRAND VARCHAR(255),
             DATE DATE, 
             STORE VARCHAR(10),
+            CATEGORY VARCHAR(255),
             URL VARCHAR(2083),
             IMAGE_AT VARCHAR(2083),
             DESCRIPTION TEXT

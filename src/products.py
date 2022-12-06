@@ -2,7 +2,7 @@ from datetime import datetime
 
 class Product:
 
-    def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications, store) -> None:
+    def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications, store, category) -> None:
         self.name = name
         self.store_product_id = product_id
         self.brand = brand
@@ -15,6 +15,7 @@ class Product:
         # specifications = {item1_key: item1_value, ..., itemn_key: itemn_value}
         self.specifications = specifications
         self.store = store
+        self.category = category
 
     # Agregar Categoría
 
@@ -60,6 +61,7 @@ class Product:
             "IMAGE_AT": self.crop(self.clean(self.image_at)),
             "PRICE": int(self.price),
             "STORE": self.crop(self.clean(self.store)),
+            "CATEGORY": self.category
         }
         # Update the atributes dict with the specs as attributes to be uploaded to DF
         # We want the keys to be in uppercase
