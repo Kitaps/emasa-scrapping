@@ -135,7 +135,7 @@ class DBHandler:
         return ic(set(column_names))
 
     def append(self, product):
-        ic(product)
+        # ic(product)
         self.__insertor.append(product)
         self.__products.append(product)
         

@@ -1,6 +1,7 @@
 import time
 import json
 import sys
+import re
 import requests
 from random import randint
 from collections import defaultdict
@@ -29,21 +30,25 @@ def get_category_range(soup):
         return 0
 
     # Find any of the page list elements on the site
-    pages_ordered_list = soup.find('ol', attrs = {'class': 'jsx-1794558402 jsx-1490357007'})
+    pages_ordered_list = soup.find_all('button', attrs = {'id': re.compile("testId-pagination-top-button\d+")})
     # ic(int(tuple(pages_ordered_list)[-1].text))
-    # Extract the last element from the obtained html element
-    #   To do this, we turn the element into a tuple and then obtain it's last element
-    last_element = tuple(pages_ordered_list)[-1]
-    # This element will have a text containing the last page name, which we want
-    number_name = last_element.text
+    if pages_ordered_list:
+        # Extract the last element from the obtained html element
+        #   To do this, we turn the element into a tuple and then obtain it's last element
+        last_element = tuple(pages_ordered_list)[-1]
+        # This element will have a text containing the last page name, which we want
+        number_name = last_element.text
     # Finally we turn the number string into an integer and return
-    return int(number_name)
+    else:
+        number_name = 1
+    return ic(int(number_name))
 
 def get_page_data(category, page_number):
     # Try to connect to SODIMAC webpage and get data
     # Return data as a Beautiful HTML Soup
     try: 
-        category_url = f'https://sodimac.falabella.com/sodimac-cl/category/{category}?subdomain=sodimac&page={page_number}&store=sodimac'
+        category_url = f'https://www.falabella.com/falabella-cl/category/{category}?page={page_number}'
+        # category_url = f'https://sodimac.falabella.com/sodimac-cl/category/{category}?subdomain=sodimac&page={page_number}&store=sodimac'
         # Based on https://es.stackoverflow.com/questions/545411/scrap-con-beautifulsoup-pero-no-obtengo-toda-la-info-los-selectores-son-multicl
         request = requests.get(category_url)
         soup = BeautifulSoup(request.text, "lxml")

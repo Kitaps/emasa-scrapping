@@ -41,7 +41,9 @@ class Product:
                             "Ó", "O").replace(
                                 "Ñ", "NI").replace(
                                     " ", "_").replace(
-                                        "/", "Y").replace(".", "PUNTO")
+                                        "/", "Y").replace(
+                                            ".", "PUNTO").replace(
+                                                "(", "__").replace(")", "__")
         return simplified_string
 
     @staticmethod

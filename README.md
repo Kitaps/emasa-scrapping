@@ -49,5 +49,6 @@
     - Check psql server port: `SELECT * FROM pg_settings WHERE name = 'port';`
 
 ## Notes
-- Deprecated: Since sales wants to search for products by ID instead of by category, development of the get_category module has stopped for sodimac (and not started for easy).
+- Deprecated: Since sales wants to search by category instead of search product by ID or SKU, development of the get_product modules has stopped for all stores.
 - SQL: [Snowflake does not support conditional T-SQL statements.](https://stackoverflow.com/questions/62524218/how-to-write-an-equivalent-if-else-adhoc-sql-query-in-snowflake) Which means that it accepts IF and IFF statements, but can only return values, not actions.
+
