@@ -2,6 +2,7 @@ import os
 # from snowflake.sqlalchemy import URL
 # from sqlalchemy import create_engine, text
 import snowflake.connector
+from collections import deque
 from icecream import ic
 
 
@@ -63,13 +64,15 @@ class DBHandler:
         self.cursor, self.__connection = connect()
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
         self.__products = list() # Temporary products fetched and to be add to db
-        self.commands = list()
+        self.commands = deque()
         self.error = None # Last error encountered
         self.__insertor = None
 
         self.commands.append(f"USE WAREHOUSE {DBHandler.SFWAREHOUSE}")
         self.commands.append(f"USE DATABASE {DBHandler.SFDATABASE}") 
         self.commands.append(f"USE SCHEMA {DBHandler.SFDATABASE}.{DBHandler.SFSCHEMA}")
+
+        self.create_table("product")
         
 
     # SQL commands
@@ -81,6 +84,7 @@ class DBHandler:
             BRAND VARCHAR(255),
             DATE DATE, 
             STORE VARCHAR(10),
+            CATEGORY VARCHAR(255),
             URL VARCHAR(2083),
             IMAGE_AT VARCHAR(2083),
             DESCRIPTION TEXT
@@ -131,7 +135,7 @@ class DBHandler:
         return ic(set(column_names))
 
     def append(self, product):
-        ic(product)
+        # ic(product)
         self.__insertor.append(product)
         self.__products.append(product)
         

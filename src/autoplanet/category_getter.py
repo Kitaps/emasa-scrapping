@@ -69,7 +69,6 @@ def parse_data(raw_data):
     else:
         image = None
 
-    ic(raw_data["images"])
     ic(f"https://www.autoplanet.cl/producto/{raw_data['pageUrl']}/{raw_data['code']}")
     kwargs = {
         "name": raw_data["name"].strip(),
