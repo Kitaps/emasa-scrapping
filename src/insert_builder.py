@@ -40,7 +40,7 @@ class InsertBuilder:
     def parse_insertion(self, product):
         # Prepare the command to insert the items
         # Add extra columns to table to fit all extra product specifications
-        product_dict =  ic(product.export_dict())
+        product_dict =  product.export_dict()
         keys = set(product_dict.keys())
         for new_spec in (keys-self.headers):
             self.db_handler.commands.append(f"ALTER TABLE products ADD COLUMN {new_spec} VARCHAR(255);")
