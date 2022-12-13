@@ -9,6 +9,7 @@ from src.products import Product
 from src.database_hanlder import DBHandler
 from src.insert_builder import InsertBuilder
 from src.sku_getter import sonax_skus
+from src.aux_functions import take_time
 
 
 
@@ -83,6 +84,7 @@ def main2():
     handler.insert_items()
     handler.execute_commands()
 
+@take_time
 def main3(getter):
     errors = 0
     handler = DBHandler() # Create instance of database handler
@@ -119,8 +121,8 @@ def main3(getter):
     handler.execute_commands()
 
 
-
 if __name__ == "__main__":
     # main1()
     # main2()
     main3(sodimac_getter)
+    
