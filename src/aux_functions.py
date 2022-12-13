@@ -1,5 +1,7 @@
 # Funtions to be used in other modules, to reduce repetitition
 import json
+from time import time
+from icecream import ic
 
 def load_categories(company_name):
     # Recives a company name (string). 
@@ -14,6 +16,15 @@ def format_link(string):
     string = string.replace("(", "%28").replace(")", "%29")
     string = string.replace("-", "_")
     return string
+
+def take_time(function):
+    def args_wrapper(*args):
+        start = time()
+        result = function(*args)
+        end = time()
+        ic(end - start)
+        return result
+    return args_wrapper
 
 if __name__ == "__main__":
     string = 'https://www.autoplanet.cl/producto/Filtro-de-Aceite-Mann-Filter-Jeep-(Cod.-Ref.-HU821X)-OEM-A6421840025/110177'
