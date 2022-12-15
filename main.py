@@ -98,8 +98,9 @@ def main3(getter):
         current_soup, last_page_number = getter.init_(category)
         aux_generator = chain([], getter.extract_page_data(current_soup))
 
-        for page_number in range(1, last_page_number):
-            sleep(randint(1, 10))
+        for page_number in range(1, last_page_number+1):
+            sleep(randint(1, 2))
+            # Sleep 1-2 sec for SODIMAC
             try:
                 ic(f"{page_number} of {last_page_number}")
                 current_soup = getter.get_page_data(category, page_number)
@@ -124,5 +125,5 @@ def main3(getter):
 if __name__ == "__main__":
     # main1()
     # main2()
-    main3(sodimac_getter)
+    main3(autoplanet_getter)
     
