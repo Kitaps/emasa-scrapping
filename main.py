@@ -125,5 +125,5 @@ def main3(getter):
 if __name__ == "__main__":
     # main1()
     # main2()
-    main3(sodimac_getter)
+    main3(autoplanet_getter)
     

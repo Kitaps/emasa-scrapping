@@ -62,22 +62,34 @@ def get_products_json(soup_json):
     # We explore the soup_json until fe find the products list
     return soup_json["props"]["pageProps"]["results"]
 
-def parse_data(raw_data):
+def parse_data(raw_data, category):
     # Turn dic into default dic that returns None on key error
     raw_data = defaultdict(lambda:None, raw_data)
     # Takes the obtained data and parses the useful parts to match the Product Object format
     separate_ref_code = raw_data["name"].strip().split(" (Cod. Ref. ")
     if len(separate_ref_code) > 1:
-        mann_code = separate_ref_code[1][:-1]
+        separate_ref_code = separate_ref_code[1].split(")")
+        mann_code = separate_ref_code[0]
     else:
         mann_code = None
+
+    separate_oem_code = raw_data["name"].strip().split("OEM ")
+    if len(separate_oem_code) > 1:
+        oem_code = separate_oem_code[1]
+    else:
+        oem_code = None
 
     if raw_data["images"]:
         image = raw_data["images"][0]["url"]
     else:
         image = None
 
-    ic(f"https://www.autoplanet.cl/producto/{raw_data['pageUrl']}/{raw_data['code']}")
+    if raw_data["StockLevelStatus"]:
+        stock = raw_data["StockLevelStatus"]["code"]
+    else:
+        stock = None
+
+    # ic(f"https://www.autoplanet.cl/producto/{raw_data['pageUrl']}/{raw_data['code']}")
     kwargs = {
         "name": raw_data["name"].strip(),
         "product_id": raw_data["code"], # For now sku and product id are the same in easy
@@ -89,10 +101,12 @@ def parse_data(raw_data):
         "price": raw_data["price"]["value"],
         "url": format_link(f"https://www.autoplanet.cl/producto/{raw_data['pageUrl']}/{raw_data['code']}"),
         "store": "autoplanet",
+        "category": category,
         "specifications": {
             "discountedPrice": raw_data["discountedPrice"]["value"], 
-            "stock": ic(raw_data["StockLevelStatus"])["code"],
-            "MannCode": mann_code}}
+            "stock": stock,
+            "oem": oem_code,
+            "manncode": mann_code}}
     return kwargs
     
 
