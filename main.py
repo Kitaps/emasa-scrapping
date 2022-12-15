@@ -3,7 +3,7 @@ from time import sleep
 from itertools import chain
 from icecream import ic
 import src.sodimac.category_getter as sodimac_getter
-import src.easy.product_getter as easy_getter
+import src.easy.category_getter as easy_getter
 import src.autoplanet.category_getter as autoplanet_getter
 from src.products import Product
 from src.database_hanlder import DBHandler
@@ -125,5 +125,5 @@ def main3(getter):
 if __name__ == "__main__":
     # main1()
     # main2()
-    main3(autoplanet_getter)
+    main3(easy_getter)
     
