@@ -48,7 +48,6 @@ def get_page_data(category, page_number):
     # Return data as a Beautiful HTML Soup
     try: 
         category_url = f'https://www.falabella.com/falabella-cl/category/{category}?page={page_number}'
-        # category_url = f'https://sodimac.falabella.com/sodimac-cl/category/{category}?subdomain=sodimac&page={page_number}&store=sodimac'
         # Based on https://es.stackoverflow.com/questions/545411/scrap-con-beautifulsoup-pero-no-obtengo-toda-la-info-los-selectores-son-multicl
         request = requests.get(category_url)
         soup = BeautifulSoup(request.text, "lxml")

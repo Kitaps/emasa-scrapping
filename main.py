@@ -3,7 +3,7 @@ from time import sleep
 from itertools import chain
 from icecream import ic
 import src.sodimac.category_getter as sodimac_getter
-import src.easy.product_getter as easy_getter
+import src.easy.category_getter as easy_getter
 import src.autoplanet.category_getter as autoplanet_getter
 from src.products import Product
 from src.database_hanlder import DBHandler
@@ -98,8 +98,9 @@ def main3(getter):
         current_soup, last_page_number = getter.init_(category)
         aux_generator = chain([], getter.extract_page_data(current_soup))
 
-        for page_number in range(1, last_page_number):
-            sleep(randint(1, 10))
+        for page_number in range(1, last_page_number+1):
+            sleep(randint(1, 2))
+            # Sleep 1-2 sec for SODIMAC
             try:
                 ic(f"{page_number} of {last_page_number}")
                 current_soup = getter.get_page_data(category, page_number)
@@ -124,5 +125,5 @@ def main3(getter):
 if __name__ == "__main__":
     # main1()
     # main2()
-    main3(sodimac_getter)
+    main3(easy_getter)
     
