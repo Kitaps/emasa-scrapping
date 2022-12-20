@@ -44,7 +44,7 @@ def get_page_data(category, page_number):
     # Try to connect to SODIMAC webpage and get data
     # Return data as a Beautiful HTML Soup
     try: 
-        category_url = f'https://www.easy.cl/{category}?page={page_number}'
+        category_url = f'https://www.easy.cl/automovil/{category}?page={page_number}'
         request = requests.get(category_url)
         ic(request)
         soup = BeautifulSoup(request.text, "lxml")

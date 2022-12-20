@@ -61,9 +61,13 @@ def get_page_data(category, page_number):
 def extract_page_data(soup):
     # Extract and save only the useful data
     soup_data = soup.find("script", attrs={'id': '__NEXT_DATA__'})
-    soup_json = json.loads(soup_data.get_text())
-    page_products_list = get_products_json(soup_json)
-    return page_products_list
+    if soup_data:
+        soup_json = json.loads(soup_data.get_text())
+        page_products_list = get_products_json(soup_json)
+        return page_products_list
+    else:
+        ic(f"ERROR: NO DATA, SKIPPING TO HANDLE ERROR")
+        return list()
 
 def get_products_json(soup_json):
     # We explore the soup_json until fe find the products list

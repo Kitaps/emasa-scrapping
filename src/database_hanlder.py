@@ -130,9 +130,15 @@ class DBHandler:
 
     def get_headers(self):
         # Gets the table metadate and returns a set with headers 
-        name_tuples = self.cursor.execute(F"SELECT COLUMN_NAME FROM {DBHandler.SFDATABASE}.information_schema.columns WHERE TABLE_NAME = 'PRODUCTS';")
-        column_names = map(lambda name_tuple: name_tuple[0], name_tuples)
-        return ic(set(column_names))
+        # If no headedrs are provided (for example if there is no table) 
+        # returns empty set
+        try:
+            name_tuples = self.cursor.execute(F"SELECT COLUMN_NAME FROM {DBHandler.SFDATABASE}.information_schema.columns WHERE TABLE_NAME = 'PRODUCTS';")
+            column_names = map(lambda name_tuple: name_tuple[0], name_tuples)
+            return ic(set(column_names))
+        except Exception as e:
+            ic(e)
+            return set()
 
     def append(self, product):
         # ic(product)
