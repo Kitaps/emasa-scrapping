@@ -2,11 +2,14 @@ from datetime import datetime
 
 class Product:
 
-    def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications, store, category) -> None:
+    def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications, store, category, scrap_date=None) -> None:
         self.name = name
         self.store_product_id = product_id
         self.brand = brand
-        self.scrap_date = datetime.date(datetime.today())
+        if not scrap_date:
+            self.scrap_date = datetime.date(datetime.today())
+        else:
+            self.scrap_date = scrap_date
         self.description = description
         self.sku = sku
         self.image_at = image_at
@@ -64,7 +67,7 @@ class Product:
             "IMAGE_AT": self.crop(self.clean(self.image_at)),
             "PRICE": int(self.price),
             "STORE": self.crop(self.clean(self.store)),
-            "CATEGORY": self.category
+            "CATEGORY": self.untilde(self.category.upper())
         }
         # Update the atributes dict with the specs as attributes to be uploaded to DF
         # We want the keys to be in uppercase

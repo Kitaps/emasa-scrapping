@@ -106,7 +106,8 @@ class DBHandler:
     def execute_commands(self):
         for sql_command in self.commands:
             try:
-                self.cursor.execute(ic(sql_command))
+                self.cursor.execute(sql_command)
+                # self.cursor.execute(ic(sql_command))
                 self.__connection.commit()
                 # self.__connection.execute(text(ic(sql_command)))
 

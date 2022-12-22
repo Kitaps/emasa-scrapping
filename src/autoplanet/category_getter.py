@@ -13,18 +13,19 @@ from aux_functions import load_categories, format_link
 
 categories = load_categories("autoplanet")
 
-category_dic = {"12": "Mantenimiento",
-"11": "oportunidades",
-"10": "Exclusivos Web",
-"09": "Desabolladura y Pintura",
-"08": "Herramientas",
-"07": "Limpieza y Cuidado",
-"06": "Accesorios",
-"05": "Iluminación y Electricidad",
-"04": "Neumáticos",
-"03": "Lubricantes",
-"02": "Baterías",
-"01": "Repuestos"}
+category_dic = {
+    "12": "Mantenimiento",
+    "11": "oportunidades",
+    "10": "Exclusivos Web",
+    "09": "Desabolladura y Pintura",
+    "08": "Herramientas",
+    "07": "Limpieza y Cuidado",
+    "06": "Accesorios",
+    "05": "Iluminación y Electricidad",
+    "04": "Neumáticos",
+    "03": "Lubricantes",
+    "02": "Baterías",
+    "01": "Repuestos"}
 
 def init_(category):
     # First iteration needs some extra steps
