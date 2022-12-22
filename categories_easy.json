@@ -1,4 +1,7 @@
 [
-    "automovil/repuestos",
-    "automovil/baterias"
+    "repuestos",
+    "baterias",
+    "neumaticos",
+    "limpieza-y-cuidado", 
+    "refrigerantes-aditivos-y-lubricantes"
 ]

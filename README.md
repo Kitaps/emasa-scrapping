@@ -47,6 +47,8 @@
         - todo: add command to `activate`
     - Login with default user: `psql -U postgres`
     - Check psql server port: `SELECT * FROM pg_settings WHERE name = 'port';`
+- snowflake Worksheet:
+    - Get table column names: `SELECT COLUMN_NAME FROM webscraping.information_schema.columns WHERE TABLE_NAME = 'PRODUCTS';`
 
 ## Notes
 - Deprecated: Since sales wants to search by category instead of search product by ID or SKU, development of the get_product modules has stopped for all stores.

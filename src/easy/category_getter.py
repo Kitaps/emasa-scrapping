@@ -44,9 +44,9 @@ def get_page_data(category, page_number):
     # Try to connect to SODIMAC webpage and get data
     # Return data as a Beautiful HTML Soup
     try: 
-        category_url = f'https://www.easy.cl/{category}?page={page_number}'
+        category_url = f'https://www.easy.cl/automovil/{category}?page={page_number}'
         request = requests.get(category_url)
-        ic(request)
+        # ic(request)
         soup = BeautifulSoup(request.text, "lxml")
         return soup
 
@@ -69,7 +69,7 @@ def get_products_json(soup_json):
 def parse_data(raw_data, category):
     # Turn dic into defaultdic that returns None on key error
     raw_data = defaultdict(lambda:None, raw_data["item"])
-    ic(raw_data)
+    # ic(raw_data)
     kwargs = {
         "name": raw_data["name"],
         "product_id": raw_data["sku"], # For now sku and product id are the same in easy

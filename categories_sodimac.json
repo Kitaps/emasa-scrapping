@@ -1,4 +1,6 @@
 [
+    "CATG10671/Carroceria",
+    "CATG10674/Rejillas-y-parrillas",
     "CATG10665/Amortiguadores",
     "CATG10653/Liquidos-y-lubricantes",
     "CATG10655/Detailing",
@@ -11,7 +13,5 @@
     "cat18380030/Cargadores-y-partidores",
     "CATG10667/Espejos-laterales-y-retrovisores",
     "CATG19031/Repuestos-y-accesorios-de-motor",
-    "CATG19030/Repuestos-para-frenos",
-    "CATG10671/Carroceria",
-    "CATG10674/Rejillas-y-parrillas"
+    "CATG19030/Repuestos-para-frenos"
 ]
