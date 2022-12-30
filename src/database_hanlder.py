@@ -1,6 +1,4 @@
 import os
-# from snowflake.sqlalchemy import URL
-# from sqlalchemy import create_engine, text
 import snowflake.connector
 from collections import deque
 from icecream import ic
@@ -17,21 +15,8 @@ def connect():
     SFSCHEMA = os.environ.get("SFSCHEMA")
     SFROLE = os.environ.get("SFROLE")
 
-    # url = URL(
-    #             user=ic(SFUSER),
-    #             password=SFKAGI,
-    #             account=ic(SFACCOUNT),
-    #             warehouse=ic(SFWAREHOUSE),
-    #             database=ic(SFDATABASE),
-    #             schema=ic(".".join((SFDATABASE, SFSCHEMA))),
-    #             role=ic(SFROLE)
-    #             )    
-    # If psql PORT is not the default(5432) add the port variable to activate and to connect
-
     # Based on postgresqltutorial.com
-    try: 
-        # engine = create_engine(url, future=True) # future is to autocommit executions
-        # connection = engine.connect()
+    try:
         connection = snowflake.connector.connect(
             user=ic(SFUSER),
             password=SFKAGI,
@@ -47,9 +32,6 @@ def connect():
     except Exception as error:
         ic("Encountered an error trying to connect to the database:")
         ic(error)
-        if connection:
-            connection.close()
-            # engine.dispose()
 
     # return connection, engine
     return cursor, connection
