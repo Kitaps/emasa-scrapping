@@ -11,7 +11,7 @@ RUN apk add --no-cache --update \
     gfortran musl-dev
 
 RUN pip install --upgrade pip
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 
 COPY . .
 
