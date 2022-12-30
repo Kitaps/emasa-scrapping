@@ -1,5 +1,4 @@
 import pandas
-import pyarrow as pa
 from datetime import datetime
 from icecream import ic
 from snowflake.connector.pandas_tools import write_pandas
@@ -28,9 +27,6 @@ class InsertBuilder:
         for new_spec in (keys-self.headers):
             self.db_handler.commands.append(f"ALTER TABLE products ADD COLUMN {new_spec} VARCHAR(255);")
             self.headers.update(keys)
-            # Update schema with new column key
-            new_schema = self.flavor_schema.append(pa.field(new_spec, pa.string()))
-            self.flavor_schema = new_schema
         return product_dict
 
     def build_insert_query(self):
