@@ -3,7 +3,6 @@ import sys
 import requests
 from itertools import chain
 from os.path import dirname, realpath
-from random import randint
 from collections import defaultdict
 from icecream import ic
 # Add the parent directory name of the current file into the python path
@@ -12,20 +11,6 @@ sys.path.append(dirname(dirname(realpath(__file__))))
 from aux_functions import load_categories, format_link
 
 categories = load_categories("autoplanet")
-
-category_dic = {
-    "12": "Mantenimiento",
-    "11": "oportunidades",
-    "10": "Exclusivos Web",
-    "09": "Desabolladura y Pintura",
-    "08": "Herramientas",
-    "07": "Limpieza y Cuidado",
-    "06": "Accesorios",
-    "05": "Iluminación y Electricidad",
-    "04": "Neumáticos",
-    "03": "Lubricantes",
-    "02": "Baterías",
-    "01": "Repuestos"}
 
 def init_(category):
     # First iteration needs some extra steps
@@ -115,7 +100,7 @@ def parse_data(raw_data, category):
         "price": raw_data["price"]["value"],
         "url": format_link(f"https://www.autoplanet.cl/producto/{raw_data['pageUrl']}/{raw_data['code']}"),
         "store": "autoplanet",
-        "category": category_dic[category],
+        "category": category,
         "specifications": {
             "discountedPrice": raw_data["discountedPrice"]["value"], 
             "stock": stock,
@@ -127,38 +112,32 @@ def parse_data(raw_data, category):
 
 if __name__ == "__main__":
 
+    from time import sleep
+    from random import random
+    from products import Product
+
     autoplanet_products = dict()
     current_soup = None
     last_page_number = 0
-    for category in categories:
-        autoplanet_products[category] = []
-        aux_generator = []
-        product_generator = []
-        ic(category)    
-        
-        # response = requests.get(category_url).content
-        # current_soup = BeautifulSoup(response, 'html5lib')
-        
-        current_soup, last_page_number = init_(category)
-        aux_generator = chain([], extract_page_data(current_soup))
-        
-        # ic(soup.prettify())
-        
-        # Todo --> remove the last_page_number overwrite
-        # last_page_number = 2
-        for page_number in range(1, last_page_number):
-            # Wait a bit to prevent the webpagge of kicking us out
-            # Wait between 5 and 10 seconds
-            time.sleep(randint(5, 10))
-            ic(page_number)
-            ic(len(autoplanet_products[category]))
+    category = "109"
+    aux_generator = []
+    
+    current_soup, last_page_number = init_(category)
+    sleep(1 + random())
+    aux_generator = chain([], extract_page_data(current_soup))
+
+    for page_number in range(1, last_page_number+1):
+        sleep(1 + random())
+        # Sleep the minimum time of the store + some randomness to seem organic 
+        # to prevent being shut out of source api for too many consecutive requests
+        try:
+            ic(f"{category}: {page_number} of {last_page_number}")
             current_soup = get_page_data(category, page_number)
             current_soup_json = extract_page_data(current_soup)
             aux_generator = chain(aux_generator, current_soup_json) # Concatenate lists
-            ic(len(current_soup_json))
+        except Exception as error:
+            print(type(error))
+            continue
 
-        #     category_name = category.split("/")[-1]
-        #     with open(f"request_inputs&outputs/autoplanet/{category_name}{page_number}.json", "w") as json_file:
-        #         json.dump(current_soup_json, json_file)
-        autoplanet_products[category] = list(aux_generator)
-        ic(len(autoplanet_products[category]))
+    ready_data_generator = map(lambda raw_data: parse_data(raw_data, category), aux_generator)
+    product_list = list(map(lambda rd: Product(**rd), ready_data_generator))

@@ -6,6 +6,7 @@ import requests
 from random import randint
 from collections import defaultdict
 from os.path import dirname, realpath
+from time import sleep
 from icecream import ic
 from bs4 import BeautifulSoup
 # Add the parent directory name of the current file into the python path
@@ -38,7 +39,8 @@ def get_category_range(soup):
     # Finally we turn the number string into an integer and return
     else:
         number_name = 1
-    return ic(int(number_name))
+    # If the next request is done without waiting sometimes the program get's locket out of the easy product api
+    return int(number_name)
 
 def get_page_data(category, page_number):
     # Try to connect to SODIMAC webpage and get data
@@ -57,7 +59,13 @@ def get_page_data(category, page_number):
 
 def extract_page_data(soup):
     # Extract and save only the useful data
-    soup_data = soup.find_all("script", attrs={'type': 'application/ld+json'})[1]
+    soup_datas = soup.find_all("script", attrs={'type': 'application/ld+json'})
+    if len(soup_datas) > 1:
+        soup_data = soup_datas[1]
+    else:
+        with open("request_inputs&outputs\easy\soup_dump.html", "w") as file:
+            file.write(str(soup))
+        soup_data = soup_datas[0]
     soup_json = json.loads(soup_data.get_text())
     page_products_list = soup_json["itemListElement"]
     return page_products_list

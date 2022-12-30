@@ -1,5 +1,5 @@
 import threading
-from random import randint
+from random import random
 from time import sleep, time
 from itertools import chain
 from icecream import ic
@@ -13,7 +13,7 @@ from src.aux_functions import take_time, generate_params, generate_data
 
 
 @take_time
-def main(getter, lock):
+def main(getter, lock, min_wait_time):
     errors = 0
 
     lock.acquire()
@@ -26,11 +26,13 @@ def main(getter, lock):
     for category in getter.categories:
         aux_generator = []
         current_soup, last_page_number = getter.init_(category)
+        sleep(min_wait_time + random())
         aux_generator = chain([], getter.extract_page_data(current_soup))
 
         for page_number in range(1, last_page_number+1):
-            sleep(randint(1, 2))
-            # Sleep 1-2 sec to prevent being shut out of source api for too many consecutive requests
+            sleep(min_wait_time + random())
+            # Sleep the minimum time of the store + some randomness to seem organic 
+            # to prevent being shut out of source api for too many consecutive requests
             try:
                 ic(f"{category}: {page_number} of {last_page_number}")
                 current_soup = getter.get_page_data(category, page_number)
@@ -78,9 +80,9 @@ if __name__ == "__main__":
     # We build a lock so that no conflicts happen when writing to the database
     start = time()
     db_lock = threading.Lock()
-    t1 = threading.Thread(target=main, args=(easy_getter, db_lock))
-    t2 = threading.Thread(target=main, args=(sodimac_getter, db_lock))
-    t3 = threading.Thread(target=main, args=(autoplanet_getter, db_lock))
+    t1 = threading.Thread(target=main, args=(easy_getter, db_lock, 4))
+    t2 = threading.Thread(target=main, args=(sodimac_getter, db_lock, 1))
+    t3 = threading.Thread(target=main, args=(autoplanet_getter, db_lock, 1))
     t1.start()
     t2.start()
     t3.start()

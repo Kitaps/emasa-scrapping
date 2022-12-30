@@ -2,6 +2,36 @@ from datetime import datetime
 
 class Product:
 
+    autoplanet_category_dic = {
+        "CATEGORIA04": "Correa de Accesorios y Servicios",
+        "114": "Suspensión y Dirección",
+        "113": "Sistema de Escape",
+        "112": "Sistema de Alimentación",
+        "111": "Sensores y Eléctrica",
+        "110": "Rodamiento y Retenes",
+        "109": "Refrigeración y Calefacción",
+        "108": "Motor de Partida y Alternador",
+        "107": "Motor",
+        "106": "Frenos",
+        "105": "Filtros",
+        "104": "Embragues y Transmisión",
+        "103": "Distribución",
+        "102": "Carrocería",
+        "101": "Cambio de Aceite",
+        "100": "Afinamiento y Encendido",
+        "12": "Mantenimiento",
+        "11": "oportunidades",
+        "10": "Exclusivos Web",
+        "09": "Desabolladura y Pintura",
+        "08": "Herramientas",
+        "07": "Limpieza y Cuidado",
+        "06": "Accesorios",
+        "05": "Iluminación y Electricidad",
+        "04": "Neumáticos",
+        "03": "Lubricantes",
+        "02": "Baterías",
+        "01": "Repuestos"}
+
     def __init__(self, name, product_id, brand, description, sku, image_at, price, url, specifications, store, category, scrap_date=None) -> None:
         self.name = name
         self.store_product_id = product_id
@@ -44,10 +74,24 @@ class Product:
                             "Ó", "O").replace(
                                 "Ñ", "NI").replace(
                                     " ", "_").replace(
-                                        "/", "Y").replace(
-                                            ".", "PUNTO").replace(
-                                                "(", "__").replace(")", "__")
+                                        "-", "_").replace(
+                                            "/", "Y").replace(
+                                                ".", "PUNTO").replace(
+                                                    "(", "__").replace(")", "__")
         return simplified_string
+
+    def join_category(self, category):
+        match self.store:
+            case "autoplanet":
+                category = Product.autoplanet_category_dic[category]
+            case "sodimac":
+                category = category.split("/")[1]
+            case "easy":
+                pass
+        category = category.upper()
+        category = self.untilde(category)
+        return category
+
 
     @staticmethod
     def crop(string):
@@ -67,7 +111,7 @@ class Product:
             "IMAGE_AT": self.crop(self.clean(self.image_at)),
             "PRICE": int(self.price),
             "STORE": self.crop(self.clean(self.store)),
-            "CATEGORY": self.untilde(self.category.upper())
+            "CATEGORY": self.join_category(self.category)
         }
         # Update the atributes dict with the specs as attributes to be uploaded to DF
         # We want the keys to be in uppercase
@@ -87,12 +131,14 @@ if __name__ == "__main__":
     import sodimac.product_getter as sodimac_getter
     import easy.product_getter as easy_getter
 
-    product_data = sodimac_getter.parse_data(sodimac_getter.get_data_for(110316112))
-    bateria = Product(**product_data)
+    # product_data = sodimac_getter.parse_data(sodimac_getter.get_data_for(110316112))
+    # bateria = Product(**product_data)
 
-    product_data = easy_getter.parse_data(easy_getter.get_data_for(672286), 672286)
-    anti_pinchazo = Product(**product_data)
+    # product_data = easy_getter.parse_data(easy_getter.get_data_for(672286), 672286)
+    # anti_pinchazo = Product(**product_data)
 
-    print(bateria.export_dict())
-    print(anti_pinchazo.export_dict())
+    # print(bateria.export_dict())
+    # print(anti_pinchazo.export_dict())
+
+
 
