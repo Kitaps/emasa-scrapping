@@ -4,6 +4,7 @@ from time import time
 from datetime import date, timedelta
 from icecream import ic
 from random import randint
+from aws_secrets import get_secret
 
 def load_categories(company_name):
     # Recives a company name (string). 
@@ -57,6 +58,12 @@ def generate_data(date_price_pair, name, sku, url, store):
             "productType": "DEMO"
             }}
     return kwargs
+
+def get_secrets_dic():
+    # Returns a subscriptable json instead of a string
+    secret = get_secret()
+    secret_dic = json.loads(secret)
+    return secret_dic
 
 
 
