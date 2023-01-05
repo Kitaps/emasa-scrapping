@@ -1,19 +1,17 @@
-import os
 import snowflake.connector
 from collections import deque
 from icecream import ic
 
 
-def connect():
-    # Instead of doing it with environment variables it could also be done with
-    # a database.ini to be read with ConfigParser
-    SFUSER = os.environ.get('SFUSER')
-    SFKAGI = os.environ.get('SFKAGI')
-    SFACCOUNT = os.environ.get("SFACCOUNT")
-    SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
-    SFDATABASE = os.environ.get("SFDATABASE")
-    SFSCHEMA = os.environ.get("SFSCHEMA")
-    SFROLE = os.environ.get("SFROLE")
+def connect(secrets):
+    # Instead of local variables we are now using AWS secrets
+    SFUSER = secrets['SFUSER']
+    SFKAGI = secrets['SFKAGI']
+    SFACCOUNT = secrets["SFACCOUNT"]
+    SFWAREHOUSE = secrets["SFWAREHOUSE"]
+    SFDATABASE = secrets["SFDATABASE"]
+    SFSCHEMA = secrets["SFSCHEMA"]
+    SFROLE = secrets["SFROLE"]
 
     # Based on postgresqltutorial.com
     try:
@@ -38,21 +36,19 @@ def connect():
 
 
 class DBHandler:
-    SFWAREHOUSE = os.environ.get("SFWAREHOUSE")
-    SFDATABASE = os.environ.get("SFDATABASE")
-    SFSCHEMA = os.environ.get("SFSCHEMA")
-
-    def __init__(self):
-        self.cursor, self.__connection = connect()
+    def __init__(self, secrets):
+        self.cursor, self.__connection = connect(secrets)
         self.table_name_base = None # todo: amplify to generic table name, for now it will just be product
         self.__products = list() # Temporary products fetched and to be add to db
         self.commands = deque()
         self.error = None # Last error encountered
         self.__insertor = None
 
-        self.commands.append(f"USE WAREHOUSE {DBHandler.SFWAREHOUSE}")
-        self.commands.append(f"USE DATABASE {DBHandler.SFDATABASE}") 
-        self.commands.append(f"USE SCHEMA {DBHandler.SFDATABASE}.{DBHandler.SFSCHEMA}")
+        self.commands.append(f"USE WAREHOUSE {secrets['SFWAREHOUSE']}")
+        self.commands.append(f"USE DATABASE {secrets['SFDATABASE']}") 
+        self.commands.append(f"USE SCHEMA {secrets['SFDATABASE']}.{secrets['SFSCHEMA']}")
+
+        self.secrets = secrets
 
         self.create_table("product")
         
@@ -83,7 +79,9 @@ class DBHandler:
         # that may be missing
         self.execute_commands()
         # Do the insertion (with SQL ALquemy)
-        self.__insertor.send_insert_query(self.__connection, "products", DBHandler.SFDATABASE, DBHandler.SFSCHEMA)
+        self.__insertor.send_insert_query(
+            self.__connection, "products", 
+            self.secrets['SFDATABASE'], self.secrets['SFSCHEMA'])
 
     def execute_commands(self):
         for sql_command in self.commands:
@@ -116,7 +114,7 @@ class DBHandler:
         # If no headedrs are provided (for example if there is no table) 
         # returns empty set
         try:
-            name_tuples = self.cursor.execute(F"SELECT COLUMN_NAME FROM {DBHandler.SFDATABASE}.information_schema.columns WHERE TABLE_NAME = 'PRODUCTS';")
+            name_tuples = self.cursor.execute(F"SELECT COLUMN_NAME FROM {self.secrets['SFDATABASE']}.information_schema.columns WHERE TABLE_NAME = 'PRODUCTS';")
             column_names = map(lambda name_tuple: name_tuple[0], name_tuples)
             return ic(set(column_names))
         except Exception as e:

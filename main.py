@@ -9,15 +9,15 @@ import src.autoplanet.category_getter as autoplanet_getter
 from src.products import Product
 from src.database_hanlder import DBHandler
 from src.insert_builder import InsertBuilder
-from src.aux_functions import take_time, generate_params, generate_data
+from src.aux_functions import take_time, generate_params, generate_data, get_secrets_dic
 
 
 @take_time
-def main(getter, lock, min_wait_time):
+def main(getter, lock, min_wait_time, secrets):
     errors = 0
 
     lock.acquire()
-    handler = DBHandler() # Create instance of database handler
+    handler = DBHandler(secrets) # Create instance of database handler
     handler.add_insertor(InsertBuilder())
     lock.release()
 
@@ -79,10 +79,12 @@ def demo():
 if __name__ == "__main__":
     # We build a lock so that no conflicts happen when writing to the database
     start = time()
+    hiketsu = get_secrets_dic()
+
     db_lock = threading.Lock()
-    t1 = threading.Thread(target=main, args=(easy_getter, db_lock, 4))
-    t2 = threading.Thread(target=main, args=(sodimac_getter, db_lock, 1))
-    t3 = threading.Thread(target=main, args=(autoplanet_getter, db_lock, 1))
+    t1 = threading.Thread(target=main, args=(easy_getter, db_lock, 4, hiketsu))
+    t2 = threading.Thread(target=main, args=(sodimac_getter, db_lock, 1, hiketsu))
+    t3 = threading.Thread(target=main, args=(autoplanet_getter, db_lock, 1, hiketsu))
     t1.start()
     t2.start()
     t3.start()
