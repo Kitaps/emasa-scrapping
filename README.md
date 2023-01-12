@@ -9,7 +9,7 @@
     - On Unix or MacOS, run: `source scrapper-env/bin/activate`
 
 3. Upgrade/Update pip
-    - Run: `python.exe -m pip install --upgrade pip`
+    - Run: `python -m pip install --upgrade pip`
 
 4. Install dependencies: This reads the `requirements.txt` file and installs the required dependencies. 
     - In virtual env head Run: `python -m pip install -r requirements.txt`
