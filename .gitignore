@@ -6,3 +6,8 @@ todo.md
 debug_db.py
 feeder_files/
 jhghjhg.py
+credentials/
+credentials.json
+categories_autoplanet.json
+categories_sodimac.json
+categories_easy.json

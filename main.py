@@ -10,6 +10,7 @@ from src.products import Product
 from src.database_hanlder import DBHandler
 from src.insert_builder import InsertBuilder
 from src.aux_functions import take_time, generate_params, generate_data, get_secrets_dic
+from src.google_shees_api import build_credentials, update_categories, save_categories
 
 
 @take_time
@@ -79,8 +80,15 @@ def demo():
 if __name__ == "__main__":
     # We build a lock so that no conflicts happen when writing to the database
     start = time()
+    # We get and parse AWS secrets
     hiketsu = get_secrets_dic()
-
+    # We make sure the credentials are there to access the Sheets API
+    # If not we create them
+    build_credentials(hiketsu)
+    # We get the categories from the Google Sheet Workbook and parse it
+    # This replaces the categories jsons
+    save_categories(update_categories(hiketsu))
+    # We now run multiple threads, one for each store website to get the data
     db_lock = threading.Lock()
     t1 = threading.Thread(target=main, args=(easy_getter, db_lock, 4, hiketsu))
     t2 = threading.Thread(target=main, args=(sodimac_getter, db_lock, 1, hiketsu))
