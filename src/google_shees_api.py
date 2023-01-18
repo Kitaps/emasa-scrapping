@@ -8,18 +8,14 @@ from os.path import dirname, realpath
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from icecream import ic
 
 sys.path.append(dirname(dirname(realpath(__file__))))
-from aws_secrets import get_secret
 
 
 RANGE = 'Hoja 1!1:3'
 
 
-def get_categories(): 
-    # Gets the secrets from AWS
-    secrets = json.loads(get_secret())
+def update_categories(secrets): 
     build_credentials(secrets) 
     creds = service_account.Credentials.from_service_account_file(filename = "credentials.json")
     try:
@@ -52,9 +48,19 @@ def build_credentials(secrets):
         # Writes file
         with open("credentials.json", "w") as json_file:
             json.dump(credentials, json_file, indent=2)
+
+def save_categories(values):
+    # Parse and save the categories in the corresponding json
+    # This way we don't have to change anything else in the project
+    for row in values:
+        # The first column in each row is the name of the store
+        with open(f"categories_{row[0]}.json", "w") as json_file:
+            json.dump(row[1:], json_file, indent=4)
     
 
 if __name__ == '__main__':
+    from aux_functions import get_secrets_dic
+
     # build_credentials()
-    ic(get_categories())
+    save_categories(update_categories(get_secrets_dic()))
     
