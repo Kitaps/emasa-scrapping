@@ -6,8 +6,8 @@ WORKDIR /app
 
 COPY requirements.txt requirements.txt
 
-RUN apt-get update
-RUN apt-get upgrade
+RUN apt-get update -y
+RUN apt-get upgrade -y
 
 RUN pip install --upgrade pip
 # RUN pip install --upgrade setuptools
